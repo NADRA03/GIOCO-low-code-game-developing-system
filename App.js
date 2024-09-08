@@ -15,11 +15,11 @@ export default function App() {
     <NativeRouter>
       <FontLoader>
         <Routes>
-          <Route path="/f" element={<SignUpScreen />} />
+          <Route path="/" element={<SignUpScreen />} />
           <Route path="/home" element={<Home />} />
           <Route path="/craft" element={<Craft />} />
           <Route path="/game" element={<Game />} />
-          <Route path="/" element={<PlayScreen />} />
+          <Route path="/play" element={<PlayScreen />} />
         </Routes>
       </FontLoader>
      </NativeRouter>
