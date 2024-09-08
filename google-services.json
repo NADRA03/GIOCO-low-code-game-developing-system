@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "709973461079",
+    "project_id": "senior-f7beb",
+    "storage_bucket": "senior-f7beb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:709973461079:android:19728844b41786abecbb12",
+        "android_client_info": {
+          "package_name": "com.seniorproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqJoAv1HQBAmkcaHcWQwQskryxMDi2Xnc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
