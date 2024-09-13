@@ -8,6 +8,9 @@ import Home from './Home';
 import Craft from './Craft'; 
 import Game from './Game';
 import PlayScreen  from './Play';
+import SelectGameType from './selectGameType';
+import Developer from './developer';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -20,6 +23,8 @@ export default function App() {
           <Route path="/craft" element={<Craft />} />
           <Route path="/game" element={<Game />} />
           <Route path="/play" element={<PlayScreen />} />
+          <Route path="/select" element={<SelectGameType />} />
+          <Route path="/developer/:type" element={<Developer />} />
         </Routes>
       </FontLoader>
      </NativeRouter>

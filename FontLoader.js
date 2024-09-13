@@ -10,6 +10,7 @@ const FontLoader = ({ children }) => {
       try {
         await Font.loadAsync({
           'Minecraft Regular': require('./assets/fonts/Minecraft Regular.otf'),
+          'Domino Brick': require('./assets/fonts/DominoBrick-aYy39.ttf'),
         });
         setFontsLoaded(true);
       } catch (error) {

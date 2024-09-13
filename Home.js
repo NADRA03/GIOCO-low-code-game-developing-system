@@ -8,10 +8,10 @@ export default function Home() {
 const navigate = useNavigate();
 
 const handleCraftPress = () => {
-        navigate('/craft'); // Navigate to Home screen
+        navigate('/select'); 
       };
 const handleGamePress = () => {
-        navigate('/game'); // Navigate to the Game screen
+        navigate('/game'); 
       };
   return (
     <View style={styles.container}>

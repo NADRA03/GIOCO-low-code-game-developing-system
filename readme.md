@@ -1,3 +1,12 @@
+# start frontend
+npx expo start
+
+# start backend
+nodemon server.js
+
+# dependencies
+npm install
+
 # font
 https://www.fontspace.com/minecraft-font-f28180
 
@@ -14,9 +23,6 @@ https://www.sliderrevolution.com/resources/css-text-animation/
 # 2D pixil style pictures found in 
 1. https://www.istockphoto.com/
 
-# start
-npx expo start
-
 # database framework
 https://console.firebase.google.com/
 im.a.cyber.student@gmail.com
@@ -27,4 +33,14 @@ project_name: senior
 # assets
 https://ramminanimation.tumblr.com/
 https://www.gameart2d.com/free-platformer-game-tileset.html
+
+# sqlite
+download extention sqlite viewer
+download sqlite3
+
+# hashing guide 
+npm init -y
+npm install sqlite3 express body-parser bcryptjs express-session
+const salt = bcrypt.genSaltSync(10);
+const hashedPassword = bcrypt.hashSync('password123', salt);
 

@@ -166,15 +166,15 @@ const PlayScreen = () => {
     }
   };
 
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyPress);
-    window.addEventListener('keyup', handleKeyUp);
+  // useEffect(() => {
+  //   window.addEventListener('keydown', handleKeyPress);
+  //   window.addEventListener('keyup', handleKeyUp);
 
-    return () => {
-      window.removeEventListener('keydown', handleKeyPress);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [jumping, movingDirection]);
+  //   return () => {
+  //     window.removeEventListener('keydown', handleKeyPress);
+  //     window.removeEventListener('keyup', handleKeyUp);
+  //   };
+  // }, [jumping, movingDirection]);
 
   const handleReplay = () => {
     setHeroPosition({ x: 0, y: height - 150 });

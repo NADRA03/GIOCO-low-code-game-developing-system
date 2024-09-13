@@ -3,15 +3,36 @@ import { StatusBar, TouchableWithoutFeedback, Keyboard, View } from 'react-nativ
 import { StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import CustomText from './CustomText';
 import { useNavigate } from 'react-router-native';
+import axios from 'axios';
+import { useState } from 'react';
 
 export default function SignUpScreen() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const dismissKeyboard = () => {
     Keyboard.dismiss();
   };
 
-  const handleSignUp = () => {
-    navigate('/home'); // Navigate to Home screen
+  const handleSignUp = async () => {
+    try {
+      const response = await axios.post('http://192.168.100.31:3000/login', {
+        username,
+        password
+      }, {
+        withCredentials: true 
+      });
+
+      console.log('Response:', response.data); 
+      if (response.data.message === 'Login successful!') {
+        navigate('/home'); 
+      } else {
+        alert('Sign up failed: ' + response.data.message);
+      }
+    } catch (error) {
+      console.error('Error during sign up:', error);
+      alert('An error occurred during sign up. Please try again.');
+    }
   };
 
   return (
@@ -24,11 +45,15 @@ export default function SignUpScreen() {
             placeholder="Username"
             placeholderTextColor="#a9a9a9"
             textAlign="center"
+            value={username}
+            onChangeText={setUsername}
           />
           <TextInput
             style={styles.input}
             placeholder="Password"
             placeholderTextColor="#a9a9a9"
+            value={password}
+            onChangeText={setPassword}
             secureTextEntry
             textAlign="center"
           />
