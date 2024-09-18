@@ -4,6 +4,7 @@ import { StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import CustomText from './CustomText';
 import { useNavigate } from 'react-router-native';
 import axios from 'axios';
+import API_ENDPOINTS from './api'; 
 import { useState } from 'react';
 
 export default function SignUpScreen() {
@@ -16,7 +17,7 @@ export default function SignUpScreen() {
 
   const handleSignUp = async () => {
     try {
-      const response = await axios.post('http://192.168.100.31:3000/login', {
+      const response = await axios.post(API_ENDPOINTS.login, {
         username,
         password
       }, {

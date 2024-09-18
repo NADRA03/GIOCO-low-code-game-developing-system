@@ -10,6 +10,7 @@ import Game from './Game';
 import PlayScreen  from './Play';
 import SelectGameType from './selectGameType';
 import Developer from './developer';
+import Profile from './profile';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/craft" element={<Craft />} />
           <Route path="/game" element={<Game />} />
           <Route path="/play" element={<PlayScreen />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/select" element={<SelectGameType />} />
           <Route path="/developer/:type" element={<Developer />} />
         </Routes>

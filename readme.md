@@ -2,6 +2,7 @@
 npx expo start
 
 # start backend
+cd backend
 nodemon server.js
 
 # dependencies

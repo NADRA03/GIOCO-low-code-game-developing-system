@@ -7,7 +7,8 @@ const path = require('path');
 const cors = require('cors');
 const app = express();
 app.use(cors({
-  origin: 'http://192.168.100.31:8081', 
+  // origin: 'http://172.20.10.3:8081',                ///////////here//////////////
+  origin: 'http://192.168.100.31:8081',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -33,7 +34,7 @@ app.use(
 );
 
 app.post('/login', (req, res) => {
-  console.log('Login attempt received'); // Add this log
+  console.log('Login attempt received'); 
   console.log('Request body:', req.body); 
   const { username, password } = req.body;
 
@@ -55,6 +56,7 @@ app.post('/login', (req, res) => {
       req.session.user = {
         id: user.id,
         username: user.username,
+        profile_image: user.profile_image,
       };
 
       res.json({ message: 'Login successful!', user: req.session.user });
@@ -64,16 +66,50 @@ app.post('/login', (req, res) => {
   });
 });
 
+app.get('/profile_all', sessionMiddleware, (req, res) => {
+  const userId = req.user.id; 
 
+  const query = 'SELECT * FROM user WHERE id = ?';
+  db.get(query, [userId], (err, user) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
 
-app.get('/verify-session', (req, res) => {
-  if (req.session.user) {
-    res.json({ message: 'Session active', user: req.session.user });
-  } else {
-    res.status(401).json({ message: 'No active session' });
-  }
+    res.json({
+      message: 'Profile data retrieved successfully',
+      user: user, 
+    });
+  });
 });
 
+
+
+app.get('/verify-session', sessionMiddleware, (req, res) => {
+  res.json({ message: 'Session active', user: req.user });
+});
+
+app.get('/profile', sessionMiddleware, (req, res) => {
+  const { username, profile_image } = req.user;
+  res.json({
+    message: 'Profile data retrieved successfully',
+    username: username,
+    profile_image: profile_image
+  });
+});
+
+function sessionMiddleware(req, res, next) {
+  if (req.session.user) {
+    req.user = req.session.user; 
+    next();
+  } else {
+    res.status(401).json({ message: 'No active session, please log in.' });
+  }
+}
 
 
 app.post('/logout', (req, res) => {
