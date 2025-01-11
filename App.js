@@ -11,6 +11,8 @@ import PlayScreen  from './Play';
 import SelectGameType from './selectGameType';
 import Developer from './developer';
 import Profile from './profile';
+import Settings from './settings';
+import Assets from './Assets';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,7 +28,9 @@ export default function App() {
           <Route path="/play" element={<PlayScreen />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/select" element={<SelectGameType />} />
-          <Route path="/developer/:type" element={<Developer />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/assets" element={<Assets/>} />
+          <Route path="/developer/:id" element={<Developer />} />
         </Routes>
       </FontLoader>
      </NativeRouter>

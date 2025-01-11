@@ -188,12 +188,12 @@ const PlayScreen = () => {
     if (direction === 'left') {
       setHeroPosition(prevPosition => ({
         ...prevPosition,
-        x: Math.max(prevPosition.x - 30, 0) // Move left by 30 units.
+        x: Math.max(prevPosition.x - 30, 0) 
       }));
     } else if (direction === 'right') {
       setHeroPosition(prevPosition => ({
         ...prevPosition,
-        x: Math.min(prevPosition.x + 30, width - 100) // Move right by 30 units.
+        x: Math.min(prevPosition.x + 30, width - 100) 
       }));
     }
   };

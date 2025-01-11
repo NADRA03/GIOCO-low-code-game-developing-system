@@ -8,6 +8,9 @@ nodemon server.js
 # dependencies
 npm install
 
+# expo latest 
+npx expo install expo@latest
+
 # font
 https://www.fontspace.com/minecraft-font-f28180
 
@@ -45,3 +48,6 @@ npm install sqlite3 express body-parser bcryptjs express-session
 const salt = bcrypt.genSaltSync(10);
 const hashedPassword = bcrypt.hashSync('password123', salt);
 
+# game source codes
+https://www.codingnepalweb.com/best-javascript-games-for-beginners/
+https://www.codewithfaraz.com/article/121/20-javascript-games-with-source-code-for-beginners --very helpfull 

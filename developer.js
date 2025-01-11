@@ -1,10 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Image, Animated, Pressable } from 'react-native';
 import CustomText from './CustomText';
+import Assets from './Assets'; // Import the Assets component (or any other components)
+import { useNavigate } from 'react-router-native';
 
 export default function Developer() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const sidebarAnimation = useRef(new Animated.Value(-250)).current; // Start hidden off-screen to the left
+  const [activePage, setActivePage] = useState('Home'); // State to store the selected page
+  const sidebarAnimation = useRef(new Animated.Value(-250)).current;
+  const navigate = useNavigate();
 
   useEffect(() => {
     Animated.timing(sidebarAnimation, {
@@ -23,13 +27,25 @@ export default function Developer() {
       setSidebarVisible(false);
     }
   };
+  
+  const handleBackPress = () => {
+    navigate('/home'); 
+  };
 
 
-
-
-
-
-
+  const renderContent = () => {
+    switch (activePage) {
+      case 'Assets':
+        return <Assets />;
+      case 'Board':
+        return <CustomText>Board Page Content</CustomText>; // Placeholder for Board page
+      case 'Map':
+        return <CustomText>Map Page Content</CustomText>; // Placeholder for Map page
+      case 'Home':
+      default:
+        return <Image source={require('./assets/logo.png')} resizeMode="contain" style={styles.logo} />
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -38,17 +54,17 @@ export default function Developer() {
       </TouchableOpacity>
       <Animated.View style={[styles.sidebar, { transform: [{ translateX: sidebarAnimation }] }]}>
         <Pressable style={styles.sidebarOverlay} onPress={handlePressOutside}>
-        <TouchableOpacity style={styles.backButton} onPress={() => console.log('Back button Pressed')}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
               <CustomText style={styles.backButtonText}>&lt;</CustomText>
-            </TouchableOpacity>
+        </TouchableOpacity>
           <View style={styles.sidebarContent}>
-            <TouchableOpacity style={styles.sidebarButton} onPress={() => console.log('Button 1 Pressed')}>
+            <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Assets')}>
               <CustomText style={styles.sidebarButtonText}>Assets</CustomText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sidebarButton} onPress={() => console.log('Button 2 Pressed')}>
+            <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Board')}>
               <CustomText style={styles.sidebarButtonText}>Board</CustomText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sidebarButton} onPress={() => console.log('Button 3 Pressed')}>
+            <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Map')}>
               <CustomText style={styles.sidebarButtonText}>Map</CustomText>
             </TouchableOpacity>
             <TouchableOpacity style={styles.sidebarButton} onPress={() => console.log('Image Button Pressed')}>
@@ -57,8 +73,10 @@ export default function Developer() {
           </View>
         </Pressable>
       </Animated.View>
+      
+      {/* Main content area where selected pages will be rendered */}
       <View style={styles.mainContent}>
-      <Image source={require('./assets/logo.png')} resizeMode="contain" style={styles.logo} />
+        {renderContent()}
       </View>
     </View>
   );
@@ -70,7 +88,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   menuButton: {
-    position: 'fixed', 
+    position: 'fixed',
     top: 30,
     right: 20,
     width: 110,
@@ -126,15 +144,9 @@ const styles = StyleSheet.create({
     height: 60,
   },
   mainContent: {
-    position: 'fixed', 
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    bottom: 20,
-  },
-  title: {
-    color: '#f1f1f1',
-    fontSize: 24,
   },
   logo: {
     width: 110,

@@ -2,27 +2,56 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import CustomText from './CustomText';
 import { useNavigate } from 'react-router-native';
+import axios from 'axios';
+import API_ENDPOINTS from './api';
+import { useEffect } from 'react';
 
 export default function SelectGameType() {
   const [selectedType, setSelectedType] = useState(null);
   const navigate = useNavigate();
+  const [profileData, setProfileData] = useState({ username: '', profile_image: '', id: 0 });
 
   const handleSelectType = (type) => {
     setSelectedType(type);
   };
 
-  const handleStart = () => {
-    if (selectedType) {
-      navigate(`/developer/${selectedType}`);
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await axios.get(API_ENDPOINTS.profile, { withCredentials: true }); 
+        setProfileData(response.data); 
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+        alert('Failed to fetch profile information.');
+      }
+    };
+    
+    fetchProfileData();
+  }, []);
+
+  const handleStart = async () => {
+    if (selectedType && profileData?.id) { 
+      try {
+        const response = await axios.post(API_ENDPOINTS.game_create, {
+          type: selectedType,
+          user_id: profileData.id,
+          name: 'Tale', 
+        });
+  
+        if (response.status === 201) {
+          const { id } = response.data; 
+          navigate(`/developer/${id}`);
+        } else {
+          console.error('Failed to create the game:', response);
+        }
+      } catch (error) {
+        console.error('Error creating the game:', error);
+        alert('Error creating the game. Please try again.');
+      }
+    } else {
+      alert('Please select a game type and make sure user is logged in.');
     }
   };
-
-
-
-
-
-
-
   
   return (
     <View style={styles.container}>

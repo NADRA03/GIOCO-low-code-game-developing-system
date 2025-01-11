@@ -6,9 +6,12 @@ const session = require('express-session');
 const path = require('path');
 const cors = require('cors');
 const app = express();
+//Services
+const userService = require('./routes/userService'); 
+const gameService = require('./routes/gameService'); // Importing profile routes
 app.use(cors({
   // origin: 'http://172.20.10.3:8081',                ///////////here//////////////
-  origin: 'http://192.168.100.31:8081',
+  origin: 'http://192.168.101.31:8081',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -94,11 +97,12 @@ app.get('/verify-session', sessionMiddleware, (req, res) => {
 });
 
 app.get('/profile', sessionMiddleware, (req, res) => {
-  const { username, profile_image } = req.user;
+  const { username, profile_image, id } = req.user;
   res.json({
     message: 'Profile data retrieved successfully',
     username: username,
-    profile_image: profile_image
+    profile_image: profile_image,
+    id: id
   });
 });
 
@@ -122,6 +126,9 @@ app.post('/logout', (req, res) => {
 });
 
 
+//////routing//////// 
+app.use('/user', userService); 
+app.use('/game', gameService); 
 
 const PORT = 3000;
 app.listen(PORT, '0.0.0.0', () => {

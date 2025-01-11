@@ -39,7 +39,7 @@ export default function SignUpScreen() {
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <View style={styles.container}>
-        <CustomText style={styles.title}>Sign Up</CustomText>
+        <CustomText style={styles.title}>Sign In</CustomText>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
