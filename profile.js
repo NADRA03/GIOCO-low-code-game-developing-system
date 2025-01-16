@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Image, Text}  from 'react-native';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, FlatList  } from 'react-native';
 import CustomText from './CustomText';
 import axios from 'axios';
 import FontLoader from './FontLoader';
@@ -15,6 +15,7 @@ const [imageUri, setImageUri] = useState(null);
 const navigate = useNavigate();
 const [selectedButton, setSelectedButton] = useState('button1'); 
 const [allProfileData, setAllProfileData] = useState({ username: '', profile_image: '', wins: 0 });
+const [games, setGames] = useState([]);
 
 const handleImageError = () => {
     setImageUri(require('./assets/profile.png')); 
@@ -30,6 +31,9 @@ const handleBackPress = () => {
 
 const handleButtonPress = (button) => {
     setSelectedButton(button); 
+    if (button === 'button2') {
+      fetchUserGames(); 
+    }
   };
 
 //all profile data
@@ -78,6 +82,16 @@ useEffect(() => {
     fetchUserPlays();  
   }
 }, [profileData.id]);
+
+const fetchUserGames = async () => {
+  try {
+    const response = await axios.get(API_ENDPOINTS.user_games(profileData.id), { withCredentials: true });
+    setGames(response.data.games);
+    // console.log(response.data.games)
+  } catch (error) {
+    console.error('Error fetching user games:', error);
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -140,7 +154,25 @@ useEffect(() => {
         {selectedButton === 'button1' ? (
           <Text style={styles.viewText}>Image Button View</Text> 
         ) : (
-          <Text style={styles.viewText}>Text Button View</Text> 
+          <FlatList
+            data={games}
+            keyExtractor={(item) => item.game_id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => navigate(`/developer/${item.game_id}`)}>
+              <View style={styles.gameItem}>
+                  <Image 
+                    source={item.image ? { uri: item.image } : require('./assets/pin.png')}  // Use default image when `item.image` is null
+                    style={styles.gameImage}
+                  />
+                  <View style={styles.textContainer}>
+                    <CustomText style={styles.gameName}>{item.game_name}</CustomText>
+                    <CustomText style={styles.gameStats}>Plays: {item.plays}</CustomText>
+                    <CustomText style={styles.gameStats}>Likes: {item.likes}</CustomText>
+                  </View>
+              </View>
+              </TouchableOpacity>
+            )}
+          />
         )}
       </View>
 
@@ -221,7 +253,7 @@ const styles = StyleSheet.create({
         flex: 1,
         height: '100%',
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'left',
         marginTop: 0,
         paddingTop: 0, 
       },
@@ -279,4 +311,32 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         fontSize: 35,
       },
+      gameImage: {
+        width: 60, 
+        height: 60,
+        borderRadius: 75,
+        marginRight: 10, // Space between image and text
+        resizeMode: 'contain', 
+      },
+      gameItem: {
+        width: '100%',
+        flexDirection: 'row', // Align items horizontally
+        alignItems: 'center', // Center vertically
+        padding: 10, // Optional: Add spacing around each item
+        borderBottomWidth: 1, 
+        borderBottomColor: '#000000',
+      },
+      textContainer: {
+        flex: 1, // Allow text to take up remaining space
+      },
+      gameName: {
+        fontSize: 25,
+        fontWeight: 'bold',
+        marginBottom: 10, // Space between name and stats
+      },
+      gameStats: {
+        fontSize: 16,
+        // color: '#555', 
+      },
+
 });

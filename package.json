@@ -25,6 +25,7 @@
     "@react-navigation/stack": "^6.4.1",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
+    "connect-sqlite3": "^0.9.15",
     "cors": "^2.8.5",
     "expo": "^52.0.25",
     "expo-app-loading": "^2.1.1",

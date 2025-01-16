@@ -15,6 +15,10 @@ export default function SelectGameType() {
     setSelectedType(type);
   };
 
+  const handleBackPress = () => {
+    navigate('/home'); 
+  };
+
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -55,6 +59,9 @@ export default function SelectGameType() {
   
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
+              <CustomText style={styles.backButtonText}>&lt;</CustomText>
+     </TouchableOpacity>
       <TouchableOpacity
         style={[styles.button, selectedType === 'pts' && styles.selectedButton]}
         onPress={() => handleSelectType('pts')}
@@ -79,6 +86,18 @@ export default function SelectGameType() {
 }
 
 const styles = StyleSheet.create({
+  backButton: {
+    left: 20,
+    top: 50,
+    width: 110,
+    height: 110,
+    borderRadius: 5,
+    position: 'absolute',
+  },
+  backButtonText: {
+        color: '#ffffff',
+        fontSize: 35,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',

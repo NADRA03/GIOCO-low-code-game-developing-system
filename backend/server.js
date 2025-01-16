@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs'); 
 const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
 const path = require('path');
 const cors = require('cors');
 const app = express();
@@ -11,7 +12,7 @@ const userService = require('./routes/userService');
 const gameService = require('./routes/gameService'); // Importing profile routes
 app.use(cors({
   // origin: 'http://172.20.10.3:8081',                ///////////here//////////////
-  origin: 'http://192.168.101.31:8081',
+  origin: 'http://192.168.0.104:8081',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -32,7 +33,11 @@ app.use(
     secret: 'your_secret_key', 
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, 
+    cookie: {   secure: false, 
+      maxAge: 30 * 24 * 60 * 60 * 1000  }, 
+      store: new SQLiteStore({
+        db: 'sessions.db',
+      }),
   })
 );
 
@@ -89,7 +94,6 @@ app.get('/profile_all', sessionMiddleware, (req, res) => {
     });
   });
 });
-
 
 
 app.get('/verify-session', sessionMiddleware, (req, res) => {

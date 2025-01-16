@@ -32,4 +32,30 @@ router.post('/new', (req, res) => {
   });
 });
 
+router.get('/get_assets_for_game/:game_id', (req, res) => {
+  const { game_id } = req.params;
+
+  const query = `
+    SELECT * 
+    FROM asset
+    WHERE game_id = ?
+  `;
+
+  db.all(query, [game_id], (err, rows) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'No assets found for this game.' });
+    }
+
+    res.status(200).json({
+      message: 'Assets retrieved successfully.',
+      assets: rows,
+    });
+  });
+});
+
 module.exports = router;

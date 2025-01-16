@@ -1,0 +1,11 @@
+import React, { useState, useEffect } from 'react';
+import { View, TouchableOpacity, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { storage } from './firebaseConfig';
+import { ref, listAll, getDownloadURL } from 'firebase/storage';
+import CustomText from './CustomText';
+import axios from 'axios';
+import API_ENDPOINTS from './api';
+import { useNavigate} from 'react-router-native';
+
+
+DELETE FROM table_name WHERE id = (SELECT MAX(id) FROM table_name);

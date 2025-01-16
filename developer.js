@@ -2,13 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Image, Animated, Pressable } from 'react-native';
 import CustomText from './CustomText';
 import Assets from './Assets'; // Import the Assets component (or any other components)
-import { useNavigate } from 'react-router-native';
+import { useNavigate, useParams } from 'react-router-native';
+// import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 export default function Developer() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [activePage, setActivePage] = useState('Home'); // State to store the selected page
   const sidebarAnimation = useRef(new Animated.Value(-250)).current;
   const navigate = useNavigate();
+  const { id } = useParams();
+
 
   useEffect(() => {
     Animated.timing(sidebarAnimation, {
@@ -36,7 +39,7 @@ export default function Developer() {
   const renderContent = () => {
     switch (activePage) {
       case 'Assets':
-        return <Assets />;
+        return <Assets id={id} />;
       case 'Board':
         return <CustomText>Board Page Content</CustomText>; // Placeholder for Board page
       case 'Map':

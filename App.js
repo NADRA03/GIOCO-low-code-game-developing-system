@@ -13,6 +13,7 @@ import Developer from './developer';
 import Profile from './profile';
 import Settings from './settings';
 import Assets from './Assets';
+import ErrorBoundary from './ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,20 +21,22 @@ export default function App() {
   return (
     <NativeRouter>
       <FontLoader>
-        <Routes>
-          <Route path="/" element={<SignUpScreen />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/craft" element={<Craft />} />
-          <Route path="/game" element={<Game />} />
-          <Route path="/play" element={<PlayScreen />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/select" element={<SelectGameType />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/assets" element={<Assets/>} />
-          <Route path="/developer/:id" element={<Developer />} />
-        </Routes>
+        {/* Wrap your Routes component with the ErrorBoundary */}
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<SignUpScreen />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/craft" element={<Craft />} />
+            <Route path="/game" element={<Game />} />
+            <Route path="/play" element={<PlayScreen />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/select" element={<SelectGameType />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/assets/:id" element={<Assets />} />
+            <Route path="/developer/:id" element={<Developer />} />
+          </Routes>
+        </ErrorBoundary>
       </FontLoader>
-     </NativeRouter>
+    </NativeRouter>
   );
 }
-
