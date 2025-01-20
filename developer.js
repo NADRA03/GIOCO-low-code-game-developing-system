@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Image, Animated, Pressable } from 'react-native';
 import CustomText from './CustomText';
 import Assets from './Assets'; // Import the Assets component (or any other components)
+import Folder from './Folder';
 import { useNavigate, useParams } from 'react-router-native';
 // import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
@@ -41,9 +42,11 @@ export default function Developer() {
       case 'Assets':
         return <Assets id={id} />;
       case 'Board':
-        return <CustomText>Board Page Content</CustomText>; // Placeholder for Board page
+        return <CustomText>Board Page Content</CustomText>; 
       case 'Map':
-        return <CustomText>Map Page Content</CustomText>; // Placeholder for Map page
+        return <CustomText>Map Page Content</CustomText>; 
+      case 'Folder':
+        return <Folder id={id} />;
       case 'Home':
       default:
         return <Image source={require('./assets/logo.png')} resizeMode="contain" style={styles.logo} />
@@ -70,7 +73,7 @@ export default function Developer() {
             <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Map')}>
               <CustomText style={styles.sidebarButtonText}>Map</CustomText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sidebarButton} onPress={() => console.log('Image Button Pressed')}>
+            <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Folder')}>
               <Image source={require('./assets/folder.png')} resizeMode="contain" style={styles.sidebarImage} />
             </TouchableOpacity>
           </View>

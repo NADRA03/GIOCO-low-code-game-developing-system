@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
       position: 'absolute',
       bottom: 20,
       right: 20,
-      backgroundColor: '#b9a3e3',
+      backgroundColor: 'transparent',
       padding: 10,
       borderRadius: 5,
     },
@@ -108,12 +108,13 @@ const styles = StyleSheet.create({
     },
     gameButton: {
       top: 15,
-      backgroundColor: '#b9a3e3',
+      backgroundColor: 'transparent',
       padding: 10,
       borderRadius: 5,
     },
     gameButtonText: {
       color: '#f1f1f1',
+      textDecorationLine: 'underline',
       textAlign: 'center',
       fontSize: 16,
       fontWeight: 'bold',

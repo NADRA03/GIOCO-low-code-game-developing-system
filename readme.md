@@ -51,3 +51,6 @@ const hashedPassword = bcrypt.hashSync('password123', salt);
 # game source codes
 https://www.codingnepalweb.com/best-javascript-games-for-beginners/
 https://www.codewithfaraz.com/article/121/20-javascript-games-with-source-code-for-beginners --very helpfull 
+
+# name ideas
+SketchPlay

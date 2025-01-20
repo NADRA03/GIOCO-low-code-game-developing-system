@@ -13,6 +13,7 @@ import Developer from './developer';
 import Profile from './profile';
 import Settings from './settings';
 import Assets from './Assets';
+import Folder from './Folder';
 import ErrorBoundary from './ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="/select" element={<SelectGameType />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/assets/:id" element={<Assets />} />
+            <Route path="/folder/:id" element={<Folder />} />
             <Route path="/developer/:id" element={<Developer />} />
           </Routes>
         </ErrorBoundary>
