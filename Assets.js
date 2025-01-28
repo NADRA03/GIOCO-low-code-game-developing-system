@@ -40,16 +40,14 @@ const Assets = ({ id }) => {
     
 
     useEffect(() => {
-        setGameId(id); // Set game ID from URL
+        setGameId(id); 
     }, []);
 
     useEffect(() => {
         const fetchAssets = async () => {
           try {
-            // Fetch the last 10 assets from the API
             const lastAssetsResponse = await axios.get(API_ENDPOINTS.get_last_10_assets_for_user(user_id));
             
-            // Map through assets and fetch their Firebase URLs
             const lastAssets = await Promise.all(
               lastAssetsResponse.data.assets.map(async (asset) => {
                 let assetPath = asset.image || asset.sound;
@@ -416,7 +414,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 20,
-        marginLeft: 30,
+        marginLeft: 20,
         marginVertical: 20,
         textAlign: 'left',
         color: '#FFFFFF',

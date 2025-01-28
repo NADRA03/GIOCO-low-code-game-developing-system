@@ -9,6 +9,7 @@ import { useNavigate} from 'react-router-native';
 
 const Folder = ({ id }) => {
     const [lastAssets, setLastCollectedAssets] = useState([]);
+    const [GameAssets, setGameAssets] = useState([]);
     const [gameId, setGameId] = useState(null);
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [loading, setLoading] = useState(true); 
@@ -64,12 +65,60 @@ const Folder = ({ id }) => {
             console.error('Error fetching assets:', error);
           } 
         };
+
+        const deleteAsset = async (assetId) => {
+            try {
+                const response = await axios.delete(API_ENDPOINTS.delete_asset(assetId));
+                if (response.data.message === 'Asset deleted successfully.') {
+                    console.log('Asset deleted successfully.');
+                    reloading(); 
+                    handleDeselectAsset();
+                } else {
+                    console.error('Error deleting asset:', response.data.message);
+                    alert('Error deleting asset.');
+                }
+            } catch (error) {
+                console.error('Error deleting asset:', error);
+                alert('Error deleting asset.');
+            }
+        };
+    
+        const fetchGameAssets = async () => {
+            try {
+                const response = await axios.get(API_ENDPOINTS.get_assets_for_game(gameId));
+                if (response.data.assets) {
+                    const assets = await Promise.all(
+                        response.data.assets.map(async (asset) => {
+                            let assetPath = asset.image || asset.sound;
+                            assetPath = decodeURIComponent(assetPath);
+                            assetPath = assetPath.replace(/%2F/g, '/');
+            
+                            const assetRef = ref(storage, assetPath);
+                            const url = await getDownloadURL(assetRef);
+            
+                            return {
+                                id: asset.id,
+                                name: asset.name,
+                                url,
+                                type: asset.image ? 'image' : 'sound',
+                            };
+                        })
+                    );
+                    setGameAssets(assets);
+                } else {
+                    alert('No assets found for this game.');
+                }
+            } catch (error) {
+                console.error('Error fetching game assets:', error);
+            }
+        };
     
 
         const reloading = async () => {
             setLoading(true);
             try {
                 await fetchAssets();
+                await fetchGameAssets();
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching assets:', error);
@@ -180,7 +229,7 @@ useEffect(() => {
 
     return (
             <View style={styles.container}>
-            <CustomText style={styles.Title}>Assets</CustomText>
+            {/* <Image source={require('./assets/folder.png')} resizeMode="contain" style={styles.sidebarImage} /> */}
             <ScrollView contentContainerStyle={styles.scrollView}>
             {/* Only show loaded assets and remove loading message */}
             {loading ? (
@@ -208,11 +257,33 @@ useEffect(() => {
             ))}
             </ScrollView>
             )}
-        </>
+        {/* Game Assets Section */}
+        <CustomText style={[styles.sectionTitle, styles.additionalStyle]}>Game Assets</CustomText>
+        {GameAssets.length === 0 ? (
+          <CustomText style={styles.noAssetsText}>No assets found for this game</CustomText>
+        ) : (
+          <ScrollView horizontal contentContainerStyle={styles.assetsContainer}>
+            {GameAssets.map((asset) => (
+              <TouchableOpacity key={asset.id} onPress={() => handleSelectAsset(asset)} style={styles.imageContainer}>
+                <Image source={{ uri: asset.url }} style={styles.image} />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         )}
-    </ScrollView>
+      </>
+    )}
+  </ScrollView>
+
 {(lastAssets.length > 0) && selectedAsset && (
     <View style={styles.selectedAssetContainer}>
+    {GameAssets.some((asset) => asset.id === selectedAsset.id) && (
+      <TouchableOpacity
+        onPress={() => deleteAsset(selectedAsset.id)}
+        style={styles.deleteButton}
+      >
+        <CustomText style={styles.deleteButtonText}>Delete</CustomText>
+      </TouchableOpacity>
+    )}
         <TouchableOpacity onPress={handleDeselectAsset} style={styles.closeButton}>
             <CustomText style={styles.closeButtonText}>X</CustomText>
         </TouchableOpacity>
@@ -223,28 +294,48 @@ useEffect(() => {
             </View>
         )}
         <TouchableOpacity
-        onPress={() => { handleCollectAsset(selectedAsset); }}
-        style={[
+      onPress={() => handleCollectAsset(selectedAsset)}
+      style={[
         styles.collectButton,
         (selectedAsset.url.includes('$') || isCollected) && styles.disabledButton,
-        ]}
-        disabled={selectedAsset.url.includes('$') || isCollected}
-        >
-        <CustomText style={styles.collectButtonText}>
+      ]}
+      disabled={selectedAsset.url.includes('$') || isCollected}
+    >
+      <CustomText style={styles.collectButtonText}>
         {selectedAsset.url.includes('$')
-            ? 'Asset Locked'
-            : isCollected
-            ? 'Asset Already Collected'
-            : 'Collect Asset'}
-        </CustomText>
-        </TouchableOpacity>
-    </View>
+          ? 'Asset Locked'
+          : isCollected
+          ? 'Asset Already Collected'
+          : 'Collect Asset'}
+      </CustomText>
+    </TouchableOpacity>
+  </View>
 )}
 </View>
 );
 };
 
 const styles = StyleSheet.create({
+  sidebarImage: {
+    position: 'absolute',
+    width: 70,
+    height: 70,
+    textAlign: 'center',  
+    marginLeft: 150,
+  },
+  deleteButton: {
+  backgroundColor: 'transparent',
+  padding: 10,
+  marginTop: 5,
+  marginBottom: 10,
+  padding: 10,
+},
+deleteButtonText: {
+  color: 'rgba(255, 0, 0, 1)',
+  fontSize: 20,
+  textDecorationLine: 'underline',
+  textAlign: 'center',
+},
     noAssetsText:{
     color: 'rgba(255, 0, 0, 0.7)',
     textAlign: 'center',
@@ -267,7 +358,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 20,
-        marginLeft: 30,
+        marginLeft: 20,
         marginVertical: 20,
         textAlign: 'left',
         color: '#FFFFFF',
@@ -278,6 +369,7 @@ const styles = StyleSheet.create({
     assetsContainer: {
         flexDirection: 'row',
         paddingHorizontal: 10,
+        flexWrap: 'wrap', 
         // backgroundColor: 'rgba(80, 80, 80, 0.5)',
     },
     image: {
@@ -336,7 +428,7 @@ const styles = StyleSheet.create({
   },
   collectButtonText: {
     color: '#000000',
-    fontSize: 24,
+    fontSize: 20,
   },
   imageContainer: {
     position: 'relative',

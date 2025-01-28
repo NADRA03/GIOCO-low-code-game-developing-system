@@ -9,3 +9,4 @@ import { useNavigate} from 'react-router-native';
 
 
 DELETE FROM table_name WHERE id = (SELECT MAX(id) FROM table_name);
+

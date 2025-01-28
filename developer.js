@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Image, Animated, Pressable } from 'react-native';
 import CustomText from './CustomText';
-import Assets from './Assets'; // Import the Assets component (or any other components)
+import Craft from './Craft'; 
+import Assets from './Assets'; 
 import Folder from './Folder';
+import Map from './Map'; 
 import { useNavigate, useParams } from 'react-router-native';
 // import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
@@ -42,9 +44,9 @@ export default function Developer() {
       case 'Assets':
         return <Assets id={id} />;
       case 'Board':
-        return <CustomText>Board Page Content</CustomText>; 
+        navigate('/craft');
       case 'Map':
-        return <CustomText>Map Page Content</CustomText>; 
+        return <Map id={id} />;
       case 'Folder':
         return <Folder id={id} />;
       case 'Home':

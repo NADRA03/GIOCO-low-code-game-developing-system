@@ -14,6 +14,7 @@ import Profile from './profile';
 import Settings from './settings';
 import Assets from './Assets';
 import Folder from './Folder';
+import Map from './Map';
 import ErrorBoundary from './ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/assets/:id" element={<Assets />} />
             <Route path="/folder/:id" element={<Folder />} />
             <Route path="/developer/:id" element={<Developer />} />
+            <Route path="/Map/:id" element={<Map />} />
           </Routes>
         </ErrorBoundary>
       </FontLoader>

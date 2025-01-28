@@ -58,4 +58,28 @@ router.get('/get_assets_for_game/:game_id', (req, res) => {
   });
 });
 
+router.delete('/delete_asset/:id', (req, res) => {
+  const { id } = req.params;
+
+  const query = `
+    DELETE FROM asset
+    WHERE id = ?
+  `;
+
+  db.run(query, [id], function (err) {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ message: 'No asset found with the specified ID.' });
+    }
+
+    res.status(200).json({
+      message: 'Asset deleted successfully.',
+    });
+  });
+});
+
 module.exports = router;
