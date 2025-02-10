@@ -1,0 +1,208 @@
+@font-face {
+    font-family: 'Minecraft Regular';
+    src: url('../assets/fonts/Minecraft Regular.otf') format('truetype');
+}
+
+body, html {
+    font-family: 'Minecraft Regular', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    background: #000;
+}
+
+.main-wrapper {
+    background: #000;
+}
+
+ #gameCanvas {
+    background: #000;
+}  
+
+.character {
+    position: absolute;
+    width: 80px;  
+    height: 80px;  
+    background-size: cover;
+    z-index: 2;
+    pointer-events: none; 
+}
+
+#mario {
+    background-image: url('../assets/images/hero.gif');
+}
+
+#score {
+    font-family: 'Minecraft Regular', sans-serif;
+    position: absolute;
+    top: 20px;  /* Adjust this value to position the score vertically */
+    left: 10px; /* Adjust this value to position the score horizontally */
+    color: #fff; /* Set text color to white */
+    font-size: 20px; /* Adjust font size for better visibility */
+    z-index: 10; 
+}
+
+#level {
+    position: absolute;
+    top: 55px;  
+    left: 10px; 
+    color: #fff; 
+    font-size: 20px; 
+    z-index: 10; 
+}
+
+#enemy {
+    background-image: url('../assets/images/enemy.gif');
+}
+
+#controls {
+    position: fixed;
+    top: 10px;
+    right: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px; 
+    z-index: 1000;
+    padding: 10px;
+    border-radius: 12px;
+}
+
+#volume,
+#restartButton,
+#pauseButton {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+    background-color: none; 
+}
+
+#volume:hover,
+#restartButton:hover,
+#pauseButton:hover {
+    transform: scale(1.1);
+    background: none; 
+}
+
+#volume svg,
+#restartButton svg,
+#pauseButton svg {
+    width: 30px;
+    height: 30px;
+    fill: #f7f7f7;
+}
+
+#volume img,
+#restartButton img,
+#pauseButton img {
+    width: 20px;
+    height: 30px;
+}
+
+#pauseButton #pause {
+    width: 30px;
+    height: 30px;
+}
+
+#restartButton img {
+    width: 30px;
+    height: 30px;
+}
+
+#pause {
+    width: 15px
+}
+
+
+#restartButton {
+    margin-top: 5px;
+}
+
+#pauseButton {
+    margin-top: 10px;
+}
+
+#pause {
+    display: none; 
+}
+
+#hearts {
+    position: absolute;
+    top: 20px; 
+    left: 700px;
+    z-index: 1000;
+}
+
+.heart {
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
+}
+
+#timer {
+    position: absolute;
+    top: 90px;  
+    left: 10px; 
+    color: #fff; 
+    font-size: 20px; 
+    z-index: 1000; 
+}
+
+.projectile, .block, .pipe {
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: absolute;
+}
+
+.main-wrapper {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    font-family: 'Minecraft Regular', sans-serif;
+    font-size: 15px;
+}
+
+.background {
+    position: absolute;
+    width: auto;
+    height: auto;
+    left: 200px;
+    top: 50px;
+    object-fit: cover;
+    z-index: 1;
+}
+
+.moon {
+    position: absolute;
+    top: 20px;
+    left: 600px;
+    width: 150px;
+    height: 150px;
+    opacity: 0.5;
+    z-index: 2;
+}
+
+.bus-stop {
+    position: absolute;
+    bottom: 50px;
+    left: calc(50px - var(--camera-offset, 0));
+    width: 300px;
+    height: 200px;
+    z-index: 2;
+}
+
+.friend {
+    position: absolute;
+    bottom: 100px;
+    left: calc(100vw - 600px - var(--camera-offset, 0));
+    width: 80px;
+    height: 150px;
+    z-index: 2;
+}

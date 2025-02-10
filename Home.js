@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, Image} from 'react-native';
+import React, { useRef } from 'react';
+import { View, StyleSheet, Animated, Image} from 'react-native';
 import { TouchableOpacity } from 'react-native';
 import CustomText from './CustomText';
 import axios from 'axios';
@@ -12,6 +12,7 @@ export default function Home() {
 const [profileData, setProfileData] = useState({ username: '', profile_image: '' })
 const [imageUri, setImageUri] = useState(null);
 const navigate = useNavigate();
+const animationValue = useRef(new Animated.Value(0)).current;
 
 useEffect(() => {
   const fetchProfileData = async () => {
@@ -28,6 +29,28 @@ useEffect(() => {
   fetchProfileData();
 }, []);
 
+useEffect(() => {
+  const startAnimation = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(animationValue, {
+          toValue: -10, 
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animationValue, {
+          toValue: 0, 
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.delay(500), 
+      ])
+    ).start();
+  };
+
+  startAnimation();
+}, [animationValue]);
+
 const handleProfilePress = () => {
   navigate('/profile'); 
 };
@@ -36,6 +59,9 @@ const handleCraftPress = () => {
       };
 const handleGamePress = () => {
         navigate('/game'); 
+      };
+const handleMapGamePress = () => {
+        navigate('/run2'); 
       };
 const handleImageError = () => {
         setImageUri(require('./assets/profile.png')); 
@@ -59,6 +85,21 @@ const handleImageError = () => {
       <TouchableOpacity style={styles.gameButton} onPress={handleGamePress}>
       <CustomText style={styles.gameButtonText}>Game</CustomText>
       </TouchableOpacity>
+
+      <View>
+      {/* <Animated.View
+        style={[
+          styles.gameButtonContainer,
+          {
+            transform: [{ translateY: animationValue }],
+          },
+        ]}
+      > */}
+        <TouchableOpacity style={styles.gameButton} onPress={handleMapGamePress}>
+          <CustomText style={styles.gameButtonText}>Try This Game!</CustomText>
+        </TouchableOpacity>
+      {/* </Animated.View> */}
+    </View>
     </View>
   );
 }
@@ -103,13 +144,14 @@ const styles = StyleSheet.create({
     craftButtonText: {
       color: '#f1f1f1',
       textAlign: 'center',
+      textDecorationLine: 'underline',
       fontSize: 16,
       fontWeight: 'bold',
     },
     gameButton: {
       top: 15,
       backgroundColor: 'transparent',
-      padding: 10,
+      marginTop: 50,
       borderRadius: 5,
     },
     gameButtonText: {

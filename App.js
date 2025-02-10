@@ -6,7 +6,8 @@ import { NativeRouter, Route, Routes } from 'react-router-native';
 import SignUpScreen from './SignUpScreen';
 import Home from './Home'; 
 import Craft from './Craft'; 
-import Game from './Game';
+import Game from './game';
+import Run from './run';
 import PlayScreen  from './Play';
 import SelectGameType from './selectGameType';
 import Developer from './developer';
@@ -15,6 +16,7 @@ import Settings from './settings';
 import Assets from './Assets';
 import Folder from './Folder';
 import Map from './Map';
+import MarioGame from './run2';
 import ErrorBoundary from './ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
@@ -29,6 +31,8 @@ export default function App() {
             <Route path="/" element={<SignUpScreen />} />
             <Route path="/home" element={<Home />} />
             <Route path="/craft" element={<Craft />} />
+            <Route path="/run" element={<Run />} />
+            <Route path="/run2" element={<MarioGame/>} />
             <Route path="/game" element={<Game />} />
             <Route path="/play" element={<PlayScreen />} />
             <Route path="/profile" element={<Profile />} />

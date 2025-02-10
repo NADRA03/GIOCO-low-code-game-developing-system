@@ -312,8 +312,8 @@ const styles = StyleSheet.create({
         fontSize: 35,
       },
       gameImage: {
-        width: 60, 
-        height: 60,
+        width: 50, 
+        height: 50,
         borderRadius: 75,
         marginRight: 10, // Space between image and text
         resizeMode: 'contain', 

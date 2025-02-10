@@ -54,6 +54,7 @@
     "react-native-svg": "^15.11.1",
     "react-native-view-shot": "^3.0.0",
     "react-native-web": "~0.19.10",
+    "react-native-webview": "^13.13.2",
     "react-router-dom": "^6.26.1",
     "react-router-native": "^6.26.1",
     "sqlite3": "^5.1.7"
