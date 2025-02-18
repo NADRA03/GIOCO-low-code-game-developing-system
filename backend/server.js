@@ -11,8 +11,8 @@ const app = express();
 const userService = require('./routes/userService'); 
 const gameService = require('./routes/gameService'); // Importing profile routes
 app.use(cors({
-  // origin: 'http://172.20.10.3:8081',                ///////////here//////////////
-  origin: 'http://192.168.0.104:8081',
+  // origin: 'http://192.168.100.73:8082',                ///////////here//////////////
+  origin: 'http://172.20.10.1:8081',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -134,7 +134,7 @@ app.post('/logout', (req, res) => {
 app.use('/user', userService); 
 app.use('/game', gameService); 
 
-const PORT = 3000;
+const PORT = 3001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
