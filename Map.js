@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Image, StyleSheet, ScrollView, ActivityIndicator, TextInput, } from 'react-native';
+import { View, TouchableOpacity, Image, StyleSheet, Modal, Button, ScrollView, Text, ActivityIndicator, TextInput, } from 'react-native';
 import { storage } from './firebaseConfig';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import CustomText from './CustomText';
@@ -14,6 +14,10 @@ const [gameId, setGameId] = useState(null);
 const [isSidebarVisible, setSidebarVisible] = useState(false);
 const [loading, setLoading] = useState(true); 
 const [GameAssets, setGameAssets] = useState([]);
+const [selectedAsset, setSelectedAsset] = useState(null);
+const [mapLength, setMapLength] = useState(null);
+const [isLengthModalVisible, setLengthModalVisible] = useState(true);
+const [mapObjects, setMapObjects] = useState([]);
 
 useEffect(() => {
         setGameId(id); 
@@ -70,10 +74,30 @@ const reloading = async () => {
     }
 };
 
+const handleAssetClick = (asset) => {
+    setSelectedAsset(asset);
+};
+
+const placeAssetOnMap = (type, width, height) => {
+    if (!selectedAsset) return;
+    
+    setMapObjects([...mapObjects, { ...selectedAsset, type, width, height, x: 100, y: 100 }]);
+    setSelectedAsset(null);
+};
+
 return (
     <View style={styles.container}>
 
             <CustomText style={styles.Title}>Map</CustomText>
+            <View style={styles.code}>
+                <TouchableOpacity style={[styles.button, styles.codeButton]}>
+                    <CustomText style={styles.buttonText}>{'{'}  {'}'}</CustomText>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.button, styles.codeButton]} >
+                    <CustomText style={styles.buttonText}>javaScript</CustomText>
+                </TouchableOpacity>
+            </View>
 
             <TouchableOpacity style={styles.toggleButton} onPress={toggleSidebar}>
                 <CustomText style={styles.buttonText}>
@@ -84,7 +108,7 @@ return (
             <View style={styles.mapMain}>
             </View>
 
-{isSidebarVisible && (
+            {isSidebarVisible && (
     <View style={styles.sidebar}>
         {loading ? (
             <View style={styles.loadingContainer}>
@@ -96,17 +120,39 @@ return (
                     <CustomText style={styles.noAssetsText}>No assets found for this game</CustomText>
                 ) : (
                     <ScrollView horizontal={false}  showsVerticalScrollIndicator={false} contentContainerStyle={styles.assetsContainer}>
-                        {GameAssets.map((asset) => (
-                            <TouchableOpacity key={asset.id} style={styles.imageContainer}>
-                                <Image source={{ uri: asset.url }} style={styles.image} />
-                            </TouchableOpacity>
-                        ))}
+                    {GameAssets.map((asset) => (
+        <TouchableOpacity 
+            key={asset.id} 
+            style={[styles.imageContainer, selectedAsset?.id === asset.id && styles.selectedAsset]} 
+            onPress={() => handleAssetClick(asset)}
+        >
+            <Image source={{ uri: asset.url }} style={styles.image} />
+        </TouchableOpacity>
+    ))}
                     </ScrollView>
                 )}
             </>
         )}
     </View>
 )}
+
+{selectedAsset && (
+            <View style={styles.setElement}>
+            <ScrollView horizontal={false}  showsVerticalScrollIndicator={false} contentContainerStyle={styles.assetsContainer}>
+                <TouchableOpacity style={styles.button} onPress={() => placeAssetOnMap('enemy', 100, 100)}>
+                    <CustomText style={styles.buttonText}>Enemy</CustomText>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.button} onPress={() => placeAssetOnMap('hazard', 120, 120)}>
+                    <CustomText style={styles.buttonText}>Hazard</CustomText>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.button} onPress={() => setSelectedAsset(null)}>
+                    <CustomText style={styles.buttonText}>Cancel</CustomText>
+                </TouchableOpacity>
+                </ScrollView>
+            </View>
+        )}
     </View>
 );
 };    
@@ -116,6 +162,12 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
       },
+    code: {
+        flexDirection: 'row',  
+        position: 'absolute',
+        top: 120,
+        right: 30,
+    },
     toggleButton: {
         position: 'absolute',
         top: 80,
@@ -148,12 +200,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center', 
         alignItems: 'center', 
         height: 600,
+        zIndex: 1,
+
     },
     mapMain: {
         position: 'absolute',
         marginTop: 170, 
-        width: 500,
-        right: -200,
+        width: 370,
+        right: -160,
         backgroundColor: 'white',
         padding: 10,
         height: 400,
@@ -163,7 +217,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',                
         justifyContent: 'flex-start',        
         alignItems: 'center',                
-        paddingVertical: 10,                            
+        paddingVertical: 10,                          
     },
     image: {
         width: 50,
@@ -171,6 +225,24 @@ const styles = StyleSheet.create({
         margin: 10,
         resizeMode: 'contain',
     },
+    setElement: {
+        position: 'absolute',
+        backgroundColor: 'rgba(82, 17, 186, 0.64)',
+        bottom: 0, 
+        height: 160,
+        padding: 10,
+        zIndex: 0,  
+        width: 370,
+        right: -160,
+        alignItems: 'left',
+        borderTopWidth: 1,
+        borderTopColor: 'transparent',
+    },
+    codeButton: {
+        marginLeft: 30,
+
+    }
+
 
 });   
 

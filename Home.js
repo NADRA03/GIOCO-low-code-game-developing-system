@@ -82,9 +82,9 @@ const handleImageError = () => {
         <CustomText style={styles.craftButtonText}>Craft</CustomText>
       </TouchableOpacity>
       <CustomText style={styles.text}>Welcome to the Home Screen!</CustomText>
-      <TouchableOpacity style={styles.gameButton} onPress={handleGamePress}>
+      {/* <TouchableOpacity style={styles.gameButton} onPress={handleGamePress}>
       <CustomText style={styles.gameButtonText}>Game</CustomText>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <View>
       {/* <Animated.View
