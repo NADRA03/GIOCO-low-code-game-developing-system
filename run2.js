@@ -91,7 +91,7 @@ const MarioGame = () => {
         <WebView
   ref={webViewRef}
   originWhitelist={['*']}
-  source={{ uri: 'http://192.168.0.100:3001' }}
+  source={{ uri: 'http://172.20.10.5:3001' }}
   style={styles.webView}
   scrollEnabled={false}
   showsVerticalScrollIndicator={false}

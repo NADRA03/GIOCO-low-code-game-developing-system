@@ -60,6 +60,9 @@ const handleCraftPress = () => {
 const handleGamePress = () => {
         navigate('/game'); 
       };
+const handleSearchPress = () => {
+        navigate('/search'); 
+      };
 const handleMapGamePress = () => {
         navigate('/run2'); 
       };
@@ -78,10 +81,50 @@ const handleImageError = () => {
         />
         <CustomText style={styles.username}>{profileData.username}</CustomText>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.craftButton} onPress={handleCraftPress}>
-        <CustomText style={styles.craftButtonText}>Craft</CustomText>
+      <TouchableOpacity style={styles.logoContainer}>
+      <Image
+        source={require('./assets/logo.png')} 
+          style={styles.logoImage}
+        />
       </TouchableOpacity>
-      <CustomText style={styles.text}>Welcome to the Home Screen!</CustomText>
+      <TouchableOpacity style={styles.searchContainer} onPress={handleSearchPress}>
+      <Image
+        source={require('./assets/search.png')} 
+          style={styles.searchImage}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.craftButton} onPress={handleCraftPress}>
+      <Image
+        source={require('./assets/edit.png')} 
+          style={styles.editImage}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.dashboardButton} >
+      <CustomText style={styles.dashboardButtonText}>Dashboard</CustomText>
+      </TouchableOpacity>
+
+      <View style={styles.sectionContainer}>
+        {/* First Container */}
+        <View style={styles.section}>
+          <CustomText style={styles.title}>User Search</CustomText>
+          {/* Add content for user search here */}
+          <TouchableOpacity style={styles.gameButton} onPress={handleMapGamePress}>
+          <CustomText style={styles.gameButtonText}>Try This Game!</CustomText>
+        </TouchableOpacity>
+        </View>
+
+        {/* Second Container */}
+        <View style={styles.section}>
+          <CustomText style={styles.title}>Game Search</CustomText>
+          {/* Add content for game search here */}
+        </View>
+
+        {/* Third Container */}
+        <View style={styles.section}>
+          <CustomText style={styles.title}>Code Search</CustomText>
+          {/* Add content for code search here */}
+        </View>
+      </View>
       {/* <TouchableOpacity style={styles.gameButton} onPress={handleGamePress}>
       <CustomText style={styles.gameButtonText}>Game</CustomText>
       </TouchableOpacity> */}
@@ -95,9 +138,6 @@ const handleImageError = () => {
           },
         ]}
       > */}
-        <TouchableOpacity style={styles.gameButton} onPress={handleMapGamePress}>
-          <CustomText style={styles.gameButtonText}>Try This Game!</CustomText>
-        </TouchableOpacity>
       {/* </Animated.View> */}
     </View>
     </View>
@@ -107,16 +147,48 @@ const handleImageError = () => {
 const styles = StyleSheet.create({
   profileContainer: {
     position: 'absolute',
-    top: 40,
+    top: 70,
     left: 20,
     flexDirection: 'row',
     alignItems: 'center',
+    height: 50,
   },
   profileImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
     marginRight: 10,
+  },
+  searchContainer: {
+    position: 'absolute',
+    bottom: 20,
+    right: 90,
+    backgroundColor: 'transparent',
+    padding: 10,
+    borderRadius: 5,
+  },
+  searchImage: {
+    resizeMode: 'contain',
+    width: 25,
+    height: 25,
+  },
+  editImage: {
+    resizeMode: 'contain',
+    width: 25,
+    height: 25,
+  },
+  logoContainer: {
+    position: 'absolute',
+    top: 40,
+    left: 165,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logoImage: {
+    resizeMode: 'contain',
+    width: 40,
+    height: 40,
+    opacity: 0.5,
   },
   username: {
     fontSize: 18,
@@ -125,8 +197,6 @@ const styles = StyleSheet.create({
   },
     container: {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
       backgroundColor: '#000000',
     },
     text: {
@@ -148,18 +218,48 @@ const styles = StyleSheet.create({
       fontSize: 16,
       fontWeight: 'bold',
     },
-    gameButton: {
-      top: 15,
+    dashboardButton: {
+      position: 'absolute',
+      bottom: 20,
+      left: 20,
       backgroundColor: 'transparent',
-      marginTop: 50,
+      padding: 10,
       borderRadius: 5,
     },
-    gameButtonText: {
+    dashboardButtonText: {
       color: '#f1f1f1',
-      textDecorationLine: 'underline',
       textAlign: 'center',
       fontSize: 16,
       fontWeight: 'bold',
+    },
+    gameButton: {
+      backgroundColor: 'transparent',
+    },
+    gameButtonText: {
+      color: '#f1f1f1',
+      textAlign: 'center',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    sectionContainer: {
+      position: 'absolute',
+      flex: 1,
+      left: 10,
+      backgroundColor: '#000000',
+      top: 200,
+    },
+    section: {
+      marginLeft: 20,
+      marginBottom: 20,
+      height: 150,
+      justifyContent: 'center',
+    },
+    title: {
+      fontSize: 18,
+      color: '#CE55F2',
+      fontFamily: 'Minecraft Regular',
+      marginBottom: 10,
+      marginTop: 10,
     },
   
 });

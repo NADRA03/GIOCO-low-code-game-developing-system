@@ -16,6 +16,7 @@ import Settings from './settings';
 import Assets from './Assets';
 import Folder from './Folder';
 import Map from './Map';
+import Search from './Search';
 import MarioGame from './run2';
 import ErrorBoundary from './ErrorBoundary';
 
@@ -42,6 +43,7 @@ export default function App() {
             <Route path="/folder/:id" element={<Folder />} />
             <Route path="/developer/:id" element={<Developer />} />
             <Route path="/Map/:id" element={<Map />} />
+            <Route path="Search" element={<Search />} />
           </Routes>
         </ErrorBoundary>
       </FontLoader>

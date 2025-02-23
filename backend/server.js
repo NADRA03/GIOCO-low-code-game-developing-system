@@ -11,7 +11,7 @@ const app = express();
 const userService = require('./routes/userService'); 
 const gameService = require('./routes/gameService'); // Importing profile routes
 app.use(cors({
-  // origin: 'http://172.20.10.3:8081',                ///////////here//////////////
+  // origin: 'http://172.20.10.1:8082',                ///////////here//////////////
   origin: 'http://192.168.0.104:8081',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
