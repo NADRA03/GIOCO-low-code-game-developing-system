@@ -325,10 +325,42 @@ app.get('/profile', sessionMiddleware, (req, res) => {
 
 function sessionMiddleware(req, res, next) {
   if (req.session.user) {
-    req.user = req.session.user; 
-    next();
+    const userId = req.session.user.id;
+    const now = Date.now();
+
+    // Check if suspension status was last checked more than 2 hours ago
+    if (!req.session.lastSuspensionCheck || (now - req.session.lastSuspensionCheck) > 2 * 60 * 60 * 1000) {
+      
+      // Query the database to check if the user is suspended
+      db.get('SELECT suspend FROM user WHERE id = ?', [userId], (err, result) => {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ message: 'Internal server error.' });
+        }
+
+        if (!result) {
+          return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Check if the user is suspended
+        if (result.suspend) {
+          return res.redirect('/account-suspended');  // Redirect to the suspended page
+        }
+
+        // Update the last suspension check timestamp
+        req.session.lastSuspensionCheck = now;
+
+        // If not suspended, allow the request to proceed
+        req.user = req.session.user;
+        next();
+      });
+    } else {
+      // If suspension check was done within the last 2 hours, skip querying the database
+      req.user = req.session.user;
+      next();
+    }
   } else {
-    res.status(401).json({ message: 'No active session, please log in.' });
+    return res.redirect('/login');  // Redirect to your login page route
   }
 }
 

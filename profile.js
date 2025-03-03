@@ -12,6 +12,7 @@ import { ref, listAll, getDownloadURL } from 'firebase/storage';
 
 import { useNavigate } from 'react-router-native';
 export default function Profile() {
+  
 const [profileData, setProfileData] = useState({ username: '', profile_image: '', id: 0 })
 const [plays, setPlays] = useState({ played: 0})
 const [imageUri, setImageUri] = useState(null);
