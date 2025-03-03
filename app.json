@@ -2,6 +2,7 @@
   "expo": {
     "name": "TapTale",
     "slug": "TapTale",
+    "owner": "malak23",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -28,6 +29,17 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "731e3c15-a4dd-437e-9946-519aeeadab8a"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/731e3c15-a4dd-437e-9946-519aeeadab8a"
+    }
   }
 }

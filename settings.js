@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Image, Text, TouchableOpacity } from 'react-native';
 import CustomText from './CustomText';
 import axios from 'axios';
+import useProfile from './get_session';
 import API_ENDPOINTS from './api';
 import { useNavigate } from 'react-router-native';
 
 export default function Settings() {
   const [profileData, setProfileData] = useState({ username: '', profile_image: '' });
   const navigate = useNavigate();
+  const { imageSource, handleImageError } = useProfile();
 
   const handleBackPress = () => {
     navigate('/profile'); 
@@ -15,11 +17,11 @@ export default function Settings() {
   
   const handleLogoutPress = () => {
     // Handle logout logic here
-    navigate('/login');
+    navigate('/');
   };
 
   const handleProfilePress = () => {
-    navigate('/profile');
+    navigate('/editAccount');
   };
 
   const handlePrivacyPress = () => {
@@ -32,6 +34,9 @@ export default function Settings() {
 
   const handleQnAPress = () => {
     navigate('/qna');
+  };
+  const handleReportPress = () => {
+    navigate('/report');
   };
 
   useEffect(() => {
@@ -54,9 +59,10 @@ export default function Settings() {
       <CustomText style={styles.title}>Settings</CustomText>
       <View style={styles.profileContainer}>
         <Image
-        source={require('./assets/profile.png')}
+        source={imageSource || handleImageError()}
+        onError={handleImageError}
         //   source={profileData.profile_image ? { uri: profileData.profile_image } : require('./assets/profile.png')}
-          style={styles.profileImage}
+        style={styles.profileImage}
         />
         <CustomText style={styles.username}>{profileData.username}</CustomText>
       </View>
@@ -73,7 +79,9 @@ export default function Settings() {
         <TouchableOpacity style={styles.button} onPress={handlePromotionPress}>
         <CustomText style={styles.buttonText}>Promotion</CustomText>
         </TouchableOpacity>
-
+        <TouchableOpacity style={styles.button} onPress={handleReportPress}>
+        <CustomText style={styles.buttonText}>Report</CustomText>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={handleQnAPress}>
         <CustomText style={styles.buttonText}>Q&A</CustomText>
         </TouchableOpacity>
@@ -110,8 +118,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 35,
     fontWeight: 'bold',
-    marginVertical: 20,
-    top: 80,
+    top: 70,
+    marginBottom: 30,
     color: '#ffffff',
   },
   profileContainer: {
@@ -124,6 +132,7 @@ profileImage: {
   height: 150, // Increase the height
   borderRadius: 75,  // Adjust the borderRadius to half the size of the width/height for a circular shape
   marginBottom: 15,  // Optional: increase the bottom margin for better spacing
+  backgroundColor: '#CE55F2',
 },
   username: {
     fontSize: 25,
@@ -144,16 +153,16 @@ profileImage: {
   },
   buttonText: {
     fontFamily: 'Domino Brick',  
-    fontSize: 35,               
+    fontSize: 30,               
     color: '#f1f1f1',  
   },
   logoutButton: {
     color: '#8a6abf',
     borderRadius: 0,
-    marginTop: 55,
+    marginTop: 30,
   },
   logoutButtonText: {
-    fontSize: 25,
+    fontSize: 22,
     color: '#fff',
   },
 });

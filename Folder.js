@@ -22,11 +22,11 @@ const Folder = ({ id }) => {
     useEffect(() => {
         async function fetchAllProfileData() {
             try {
-                const response = await axios.get(API_ENDPOINTS.profile_all, {
+                const response = await axios.get(API_ENDPOINTS.all_profile, {
                     withCredentials: true
                 });
-                setAllProfileData(response.data.user);
-                setUserId(response.data.user.id); 
+                setAllProfileData(response.data);
+                setUserId(response.data.id); 
             } catch (error) {
                 console.error('Error fetching profile data:', error);
             }
@@ -40,33 +40,42 @@ const Folder = ({ id }) => {
     }, []);
 
     const fetchAssets = async () => {
-          try {
-            const lastAssetsResponse = await axios.get(API_ENDPOINTS.get_last_10_assets_for_user(user_id));
-            
-            const lastAssets = await Promise.all(
-              lastAssetsResponse.data.assets.map(async (asset) => {
-                let assetPath = asset.image || asset.sound;
-                assetPath = decodeURIComponent(assetPath);  
-                assetPath = assetPath.replace(/%2F/g, '/'); 
+      try {
+        const lastAssetsResponse = await axios.get(API_ENDPOINTS.get_last_10_assets_for_user(user_id));
     
-                const assetRef = ref(storage, assetPath);  
-                const url = await getDownloadURL(assetRef); 
+        const lastAssets = await Promise.all(
+          lastAssetsResponse.data.assets.map(async (asset) => {
+            let assetPath = asset.image || asset.sound;
+            assetPath = decodeURIComponent(assetPath);  
+            assetPath = assetPath.replace(/%2F/g, '/'); 
     
-                return {
-                  id: asset.id,
-                  name: asset.name,
-                  url, 
-                  type: asset.image ? 'image' : 'sound',
-                };
-              })
-            );
-            setLastCollectedAssets(lastAssets);
-          } catch (error) {
-            console.error('Error fetching assets:', error);
-          } 
-        };
+            try {
+              const assetRef = ref(storage, assetPath);
+              const url = await getDownloadURL(assetRef); // Attempt to fetch the download URL for the asset
+              
+              return {
+                id: asset.id,
+                name: asset.name,
+                url, 
+                type: asset.image ? 'image' : 'sound',
+              };
+            } catch (firebaseError) {
+              console.error(`Error fetching asset URL for ${asset.name}:`, firebaseError);
+              // Return null to skip this asset if it cannot be found
+              return null;
+            }
+          })
+        );
+    
+        // Filter out null values (assets that failed to load)
+        const filteredAssets = lastAssets.filter(asset => asset !== null);
+        setLastCollectedAssets(filteredAssets);
+      } catch (error) {
+        console.error('Error fetching assets:', error);
+      }
+    };    
 
-        const deleteAsset = async (assetId) => {
+    const deleteAsset = async (assetId) => {
             try {
                 const response = await axios.delete(API_ENDPOINTS.delete_asset(assetId));
                 if (response.data.message === 'Asset deleted successfully.') {
@@ -84,33 +93,43 @@ const Folder = ({ id }) => {
         };
     
         const fetchGameAssets = async () => {
-            try {
-                const response = await axios.get(API_ENDPOINTS.get_assets_for_game(gameId));
-                if (response.data.assets) {
-                    const assets = await Promise.all(
-                        response.data.assets.map(async (asset) => {
-                            let assetPath = asset.image || asset.sound;
-                            assetPath = decodeURIComponent(assetPath);
-                            assetPath = assetPath.replace(/%2F/g, '/');
-            
-                            const assetRef = ref(storage, assetPath);
-                            const url = await getDownloadURL(assetRef);
-            
-                            return {
-                                id: asset.id,
-                                name: asset.name,
-                                url,
-                                type: asset.image ? 'image' : 'sound',
-                            };
-                        })
-                    );
-                    setGameAssets(assets);
-                } else {
-                    alert('No assets found for this game.');
-                }
-            } catch (error) {
-                console.error('Error fetching game assets:', error);
+          try {
+            const response = await axios.get(API_ENDPOINTS.get_assets_for_game(gameId));
+        
+            if (response.data.assets) {
+              const assets = await Promise.all(
+                response.data.assets.map(async (asset) => {
+                  let assetPath = asset.image || asset.sound;
+                  assetPath = decodeURIComponent(assetPath);
+                  assetPath = assetPath.replace(/%2F/g, '/');
+        
+                  try {
+                    const assetRef = ref(storage, assetPath);
+                    const url = await getDownloadURL(assetRef); // Try to fetch the download URL
+        
+                    return {
+                      id: asset.id,
+                      name: asset.name,
+                      url,
+                      type: asset.image ? 'image' : 'sound',
+                    };
+                  } catch (firebaseError) {
+                    console.error(`Error fetching asset URL for ${asset.name}:`, firebaseError);
+                    // Return null to skip this asset if it's not found
+                    return null;
+                  }
+                })
+              );
+        
+              // Filter out null values (assets that couldn't be fetched)
+              const filteredAssets = assets.filter(asset => asset !== null);
+              setGameAssets(filteredAssets);
+            } else {
+              alert('No assets found for this game.');
             }
+          } catch (error) {
+            console.error('Error fetching game assets:', error);
+          }
         };
     
 

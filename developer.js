@@ -38,6 +38,10 @@ export default function Developer() {
     navigate('/home'); 
   };
 
+  const setBoard = () => {
+    navigate('/craft'); 
+  };
+
 
   const renderContent = () => {
     switch (activePage) {
@@ -69,7 +73,7 @@ export default function Developer() {
             <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Assets')}>
               <CustomText style={styles.sidebarButtonText}>Assets</CustomText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Board')}>
+            <TouchableOpacity style={styles.sidebarButton} onPress={setBoard}>
               <CustomText style={styles.sidebarButtonText}>Board</CustomText>
             </TouchableOpacity>
             <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Map')}>

@@ -1,8 +1,21 @@
 const express = require('express');
 const db = require('../db/database'); 
 const router = express.Router(); 
+const { convertSvgToPngAndUpload } = require('./convertSvgToPng');
 
 // Create a new Game 
+
+router.post('/convert-svg-to-png', async (req, res) => {
+  const { svg, fileName } = req.body;
+
+  try {
+    const downloadURL = await convertSvgToPngAndUpload(svg, fileName);
+    res.json({ url: downloadURL }); 
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to convert and upload image' });
+  }
+});
+
 router.post('/new', (req, res) => {
   const { type, user_id, name = 'Tale' } = req.body; 
   

@@ -6,10 +6,14 @@ import { useNavigate, useParams } from 'react-router-native';
 import CustomText from './CustomText';
 import { captureScreen } from 'react-native-view-shot';
 import { storage } from './firebaseConfig';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, deleteObject, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Canvas from 'react-native-canvas';
 import * as ImageManipulator from 'react-native-image-manipulator';
 import { Svg, Rect } from 'react-native-svg';
+import API_ENDPOINTS from './api';
+import axios from 'axios';
+import useProfile from './get_session';
+import { handleCollectAsset } from './collect_assets';
 
 const numRows = 30;
 const numCols = 30;
@@ -37,6 +41,7 @@ export default function Craft() {
   const [backgroundColor, setBackgroundColor] = useState('#000000'); 
   const [squarePreviewColor, setSquarePreviewColor] = useState(backgroundColor);
   const [opacity, setOpacity] = useState(1);
+  const { profileData, imageSource, handleImageError } = useProfile();
 
 
   const initializeBoard = () => {
@@ -86,17 +91,15 @@ export default function Craft() {
       <svg xmlns="http://www.w3.org/2000/svg" width="${numCols * squareSize}" height="${numRows * squareSize}">
         ${svgElements}
       </svg>`;
+      
+      const response = await axios.post(API_ENDPOINTS.png_create, {
+        svg: svgString,
+        fileName: `${profileData.id}_${new Date().toISOString()}.png`, // Adding profileData.id to the file name
+      });
 
-      // Convert SVG to Blob for uploading to Firebase
-      const blob = new Blob([svgString], { type: 'image/svg+xml' });
-
-      // Upload the Blob to Firebase Storage
-      const storageRef = ref(storage, `images/${new Date().toISOString()}.svg`);
-      await uploadBytes(storageRef, blob);
-
-      // Get the download URL
-      const downloadURL = await getDownloadURL(storageRef);
-      setSavedImage(downloadURL);
+      const downloadURL = response.data.url; 
+      handleCollectAsset(downloadURL, profileData.id)
+      setSavedImage(downloadURL);  
     } catch (error) {
       console.error('Failed to capture and save image', error);
       Alert.alert('Failed to save image: ' + error.message);
@@ -143,14 +146,25 @@ export default function Craft() {
     ).start();
   }, [animationValue]);
 
+  const deleteImage = async () => {
+    try {
+      const imageRef = ref(storage, savedImage);
+      await deleteObject(imageRef);
+      setSavedImage(null);
+      alert('Image deleted successfully');
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      alert('Failed to delete image');
+    }
+  };
 
-  if (!showBoard) {
+if (!showBoard) {
     const translateY = animationValue.interpolate({
       inputRange: [0, 1],
       outputRange: [0, -20], // Image moves up by 20px
     });
+
     return (
-      
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.containerMod}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigate(-1)}>
@@ -212,9 +226,9 @@ export default function Craft() {
         </View>
       </TouchableWithoutFeedback>
     );
-  }
+}
 
-  return (
+return (
     <View style={styles.container}>
       <View style={styles.colorPickerContainer}>
         <ScrollView horizontal contentContainerStyle={styles.colorPalette}>
@@ -292,16 +306,46 @@ export default function Craft() {
           zIndex: -1, // Ensure it's invisible but functional
         }}
       />
-      {savedImage && (
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: savedImage }} style={styles.image} />
-        </View>
-      )}
+{savedImage && (
+  <View style={styles.imageContainer}>
+    <TouchableOpacity style={styles.closeButton} onPress={() => setSavedImage(null)}>
+      <Text style={styles.closeButtonText}>X</Text>
+    </TouchableOpacity>
+    <Image source={{ uri: savedImage }} style={styles.image} />
+    {/* <TouchableOpacity style={styles.deleteButton} onPress={deleteImage}>
+      <Text style={styles.deleteButtonText}>Delete Image</Text>
+    </TouchableOpacity> */}
+  </View>
+)}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  deleteButton: {
+    marginTop: 15,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    color: '#000000',
+    fontSize: 20,
+    fontFamily: 'Minecraft Regular', 
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    borderRadius: 15,
+    padding: 5,
+    zIndex: 1,
+  },
+  closeButtonText: {
+    color: '#000000',
+    fontSize: 24,
+    fontFamily: 'Minecraft Regular', 
+  },
   back: {
     left: 20,
     width: 110,
@@ -344,13 +388,12 @@ const styles = StyleSheet.create({
   },
   inputMod: {
     width: '80%',
-    borderColor: '#ffffff', 
+    borderColor: '#262626', 
     borderWidth: 1,
     padding: 10,
     marginBottom: 15,
-    fontSize: 16,
     color: '#ffffff',
-    backgroundColor: '#262626', 
+    backgroundColor: '#fffff', 
     fontFamily: 'Minecraft Regular',
   },
   buttonMod: {
@@ -438,10 +481,13 @@ const styles = StyleSheet.create({
   imageContainer: {
     marginTop: 20,
     alignItems: 'center',
+    backgroundColor: '#505050',
+    height: 300,
   },
   image: {
-    width: 300,
-    height: 300,
+    marginTop: 70,
+    width: 150,
+    height: 150,
   },
 });
 

@@ -1,25 +1,27 @@
 import React, { useRef } from 'react';
-import { View, StyleSheet, Animated, Image} from 'react-native';
+import { View, StyleSheet, Animated, Easing} from 'react-native';
+import { Image } from 'expo-image';
 import { TouchableOpacity } from 'react-native';
 import CustomText from './CustomText';
 import axios from 'axios';
 import FontLoader from './FontLoader';
 import API_ENDPOINTS from './api';
 import { useEffect, useState } from 'react';
-
+import useProfile from './get_session';
 import { useNavigate } from 'react-router-native';
+
 export default function Home() {
+const { imageSource, handleImageError } = useProfile();
 const [profileData, setProfileData] = useState({ username: '', profile_image: '' })
-const [imageUri, setImageUri] = useState(null);
 const navigate = useNavigate();
-const animationValue = useRef(new Animated.Value(0)).current;
+const moveAnim = new Animated.Value(0);
+
 
 useEffect(() => {
   const fetchProfileData = async () => {
     try {
       const response = await axios.get(API_ENDPOINTS.profile, { withCredentials: true }); 
       setProfileData(response.data); 
-      setImageUri(response.data.profile_image); 
     } catch (error) {
       console.error('Error fetching profile data:', error);
       alert('Failed to fetch profile information.');
@@ -29,27 +31,32 @@ useEffect(() => {
   fetchProfileData();
 }, []);
 
+
 useEffect(() => {
-  const startAnimation = () => {
+  const moveWitch = () => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(animationValue, {
-          toValue: -10, 
-          duration: 100,
-          useNativeDriver: true,
+        Animated.timing(moveAnim, {
+          toValue: 1, 
+          duration: 5000, 
+          easing: Easing.linear,
+          useNativeDriver: true, 
         }),
-        Animated.timing(animationValue, {
-          toValue: 0, 
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.delay(500), 
+        Animated.delay(10000),
       ])
     ).start();
   };
 
-  startAnimation();
-}, [animationValue]);
+  moveWitch(); 
+
+  return () => moveAnim.stopAnimation();
+}, [moveAnim]);
+
+
+const translateX = moveAnim.interpolate({
+  inputRange: [0, 1],
+  outputRange: [-100, 650], 
+});
 
 const handleProfilePress = () => {
   navigate('/profile'); 
@@ -60,33 +67,41 @@ const handleCraftPress = () => {
 const handleGamePress = () => {
         navigate('/game'); 
       };
+const handleAProfilePress = () => {
+        navigate('/game'); 
+      };
 const handleSearchPress = () => {
         navigate('/search'); 
       };
 const handleMapGamePress = () => {
         navigate('/run2'); 
       };
-const handleImageError = () => {
-        setImageUri(require('./assets/profile.png')); 
-      };
     
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.profileContainer} onPress={handleProfilePress}>
       <Image
-        source={require('./assets/profile.png')} 
-        // source={imageUri ? { uri: imageUri } : require('./assets/profile.png')}
+          source={imageSource || handleImageError()} 
           style={styles.profileImage}
           onError={handleImageError} 
         />
         <CustomText style={styles.username}>{profileData.username}</CustomText>
       </TouchableOpacity>
+      {/* <TouchableOpacity style={styles.profileButton} onPress={handleAProfilePress}>
+          <CustomText style={styles.profileButtonText}>Check this Profile!</CustomText>
+      </TouchableOpacity> */}
       <TouchableOpacity style={styles.logoContainer}>
       <Image
         source={require('./assets/logo.png')} 
           style={styles.logoImage}
         />
       </TouchableOpacity>
+      {/* <View>
+        <Animated.Image
+          source={require('./assets/witch.gif')}
+          style={[{ transform: [{ translateX }] }, styles.witchImage]}
+        />
+      </View> */}
       <TouchableOpacity style={styles.searchContainer} onPress={handleSearchPress}>
       <Image
         source={require('./assets/search.png')} 
@@ -106,7 +121,7 @@ const handleImageError = () => {
       <View style={styles.sectionContainer}>
         {/* First Container */}
         <View style={styles.section}>
-          <CustomText style={styles.title}>User Search</CustomText>
+          <CustomText style={styles.title}>Recommended For You</CustomText>
           {/* Add content for user search here */}
           <TouchableOpacity style={styles.gameButton} onPress={handleMapGamePress}>
           <CustomText style={styles.gameButtonText}>Try This Game!</CustomText>
@@ -115,13 +130,13 @@ const handleImageError = () => {
 
         {/* Second Container */}
         <View style={styles.section}>
-          <CustomText style={styles.title}>Game Search</CustomText>
+          <CustomText style={styles.title}>Continue</CustomText>
           {/* Add content for game search here */}
         </View>
 
         {/* Third Container */}
         <View style={styles.section}>
-          <CustomText style={styles.title}>Code Search</CustomText>
+          <CustomText style={styles.title}>Explore</CustomText>
           {/* Add content for code search here */}
         </View>
       </View>
@@ -145,6 +160,20 @@ const handleImageError = () => {
 }
 
 const styles = StyleSheet.create({
+  profileButton: {
+    position: 'absolute',
+    backgroundColor: 'transparent',
+    top: 110, 
+    zIndex: 1000,
+  },
+  profileButtonText: {
+    color: '#CE55F2',
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    paddingLeft: 10,
+    marginLeft: 120,
+  },
   profileContainer: {
     position: 'absolute',
     top: 70,
@@ -158,6 +187,14 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     marginRight: 10,
+    backgroundColor: '#CE55F2',
+  },
+  witchImage: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    left: -200,
+    top: 140,
   },
   searchContainer: {
     position: 'absolute',
@@ -233,33 +270,37 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
     },
     gameButton: {
+      position: 'absolute',
       backgroundColor: 'transparent',
+      top: 440, 
     },
     gameButtonText: {
-      color: '#f1f1f1',
+      color: 'white',
       textAlign: 'center',
       fontSize: 16,
       fontWeight: 'bold',
+      paddingLeft: 10,
+      marginLeft: 0,
     },
     sectionContainer: {
       position: 'absolute',
       flex: 1,
-      left: 10,
       backgroundColor: '#000000',
-      top: 200,
+      top: 250,
+      width: '100%',
     },
     section: {
-      marginLeft: 20,
+      marginLeft: 0,
       marginBottom: 20,
-      height: 150,
-      justifyContent: 'center',
+      height: 130,
+      width: '100%',
+      backgroundColor: 'rgba(80, 80, 80, 0.5)',
     },
     title: {
+      padding: 10,
       fontSize: 18,
-      color: '#CE55F2',
+      color: 'white',
       fontFamily: 'Minecraft Regular',
-      marginBottom: 10,
-      marginTop: 10,
     },
   
 });

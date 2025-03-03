@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, FlatList, Text, Image } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, FlatList, Text } from 'react-native';
 import axios from 'axios';
 import CustomText from './CustomText';
 import { Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { useNavigate } from 'react-router-native';
 import API_ENDPOINTS from './api';
+import { Image } from 'expo-image';
 
 export default function Search() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,7 +29,7 @@ export default function Search() {
         setSearchResults(response.data);
       } else if (category === 'user') {
         // Partial match search for user
-        response = await axios.get(API_ENDPOINTS.searchUser, { params: { query: searchQuery } });
+        response = await axios.get(API_ENDPOINTS.all_profiles, { params: { search: searchQuery } });
         setSearchResults(response.data);
       } else if (category === 'game_name') {
         // Partial match search for game name
@@ -60,15 +60,39 @@ export default function Search() {
     navigate('/home'); 
   };
 
+
   const renderSearchResult = ({ item }) => {
     return (
-      <TouchableOpacity style={styles.resultContainer} onPress={() => navigate(`/game/${item.id}`)}>
-        <CustomText style={styles.resultText}>
-          {item.game_name ? item.game_name : item.username} - {item.game_code || 'No Code'}
-        </CustomText>
+      <TouchableOpacity
+        style={styles.resultContainer}
+        onPress={() =>
+          category === 'user'
+            ? navigate(`/a_profile/${item.id}`)
+            : navigate(`/game/${item.id}`)
+        }
+      >
+        {category === 'user' ? (
+          <View style={styles.userContainer}>
+            {/* <Image
+              source={{ uri: item.profile_image }}
+              style={styles.profileImage}
+              // onError={(e) => {
+              //   e.target.setNativeProps({
+              //     src: require('./assets/plays.png')
+              //   });
+              // }}
+            /> */}
+            <CustomText style={styles.resultText}>@ {item.username}</CustomText>
+          </View>
+        ) : (
+          <CustomText style={styles.resultText}>
+            {item.game_name} - {item.game_code || 'No Code'}
+          </CustomText>
+        )}
       </TouchableOpacity>
     );
   };
+  
 
   const getPlaceholderText = () => {
     switch (category) {
@@ -152,6 +176,17 @@ export default function Search() {
 }
 
 const styles = StyleSheet.create({
+  userContainer: {
+    // Your styles for user container
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
     backButton: {
     position: 'absolute',
     left: 20,
@@ -211,7 +246,6 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
     width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
@@ -227,7 +261,6 @@ const styles = StyleSheet.create({
     opacity: 0.5, 
   },
   resultContainer: {
-    backgroundColor: '#444444',
     padding: 10,
     marginBottom: 10,
   },

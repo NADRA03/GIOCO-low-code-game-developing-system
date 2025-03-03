@@ -2,6 +2,35 @@ const express = require('express');
 const db = require('../db/database'); 
 const router = express.Router(); 
 
+router.post('/send_report', (req, res) => {
+  console.log("Sending report");
+
+  const { seen, problem, user_id } = req.body;
+
+  if (!user_id) {
+    return res.status(400).json({ message: 'User ID is required.' });
+  }
+
+  const currentDate = new Date().toISOString().split('T')[0]; 
+
+  const query = `
+    INSERT INTO report (date, seen, problem, user_id)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  db.run(query, [currentDate, seen, problem, user_id], function(err) {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+
+    res.status(200).json({
+      message: 'Report successfully created.',
+      reportId: this.lastID, 
+    });
+  });
+});
+
 
 router.get('/plays/:userId', (req, res) => {
   const userId = req.params.userId;
@@ -77,24 +106,44 @@ router.post('/add_asset', (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Check if the game exists
-    const gameCheckQuery = 'SELECT id FROM game WHERE id = ?';
-    db.get(gameCheckQuery, [game_id], (err, gameRow) => {
-      if (err) {
-        console.error('Database query error:', err);
-        return res.status(500).json({ message: 'Internal server error.' });
-      }
+    // Check if the game exists if game_id is provided
+    if (game_id) {
+      const gameCheckQuery = 'SELECT id FROM game WHERE id = ?';
+      db.get(gameCheckQuery, [game_id], (err, gameRow) => {
+        if (err) {
+          console.error('Database query error:', err);
+          return res.status(500).json({ message: 'Internal server error.' });
+        }
 
-      if (!gameRow) {
-        return res.status(404).json({ message: 'Game not found.' });
-      }
+        if (!gameRow) {
+          return res.status(404).json({ message: 'Game not found.' });
+        }
 
-      // Insert the new asset
+        // Insert the new asset with the game_id
+        const insertAssetQuery = `
+          INSERT INTO asset (private, name, user_id, image, sound, game_id)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        db.run(insertAssetQuery, [true, name, user_id, image || null, sound || null, game_id], function (err) {
+          if (err) {
+            console.error('Database insert error:', err);
+            return res.status(500).json({ message: 'Internal server error.' });
+          }
+
+          // Respond with the ID of the newly created asset
+          res.status(201).json({ 
+            message: 'Asset added successfully.', 
+            asset_id: this.lastID 
+          });
+        });
+      });
+    } else {
+      // Insert the new asset without game_id
       const insertAssetQuery = `
-        INSERT INTO asset (private, name, user_id, image, sound, game_id)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO asset (private, name, user_id, image, sound)
+        VALUES (?, ?, ?, ?, ?)
       `;
-      db.run(insertAssetQuery, [true, name, user_id, image || null, sound || null, game_id], function (err) {
+      db.run(insertAssetQuery, [true, name, user_id, image || null, sound || null], function (err) {
         if (err) {
           console.error('Database insert error:', err);
           return res.status(500).json({ message: 'Internal server error.' });
@@ -106,7 +155,7 @@ router.post('/add_asset', (req, res) => {
           asset_id: this.lastID 
         });
       });
-    });
+    }
   });
 });
 

@@ -9,11 +9,13 @@ import API_ENDPOINTS from './api';
 import { useEffect, useState } from 'react';
 import { storage } from './firebaseConfig';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
-
 import { useNavigate } from 'react-router-native';
-export default function Profile() {
+import { useParams } from 'react-router-dom';
+
+export default function A_Profile() {
 const [profileData, setProfileData] = useState({ username: '', profile_image: '', id: 0 })
 const [plays, setPlays] = useState({ played: 0})
+const { id } = useParams();
 const [imageUri, setImageUri] = useState(null);
 const navigate = useNavigate();
 const [selectedButton, setSelectedButton] = useState('button1'); 
@@ -28,7 +30,7 @@ useEffect(() => {
 
         // Filter the files to match userId with any extension
         const userImage = files.items.find((file) =>
-          file.name.startsWith(profileData.id)
+          file.name.startsWith(id)
         );
 
         if (userImage) {
@@ -37,15 +39,15 @@ useEffect(() => {
         }
       } catch (error) {
         console.error('Error fetching image:', error);
-        setImageSource(require('./assets/user.svg'));
+        setImageSource(require('./assets/plays.png'));
       }
     };
 
     fetchImage();
-}, [profileData.id]);
+}, [id]);
 
 const handleImageError = () => {
-  return require('./assets/plays.png');
+    return require('./assets/plays.png');
 };
 
 const handleBackPress = () => {
@@ -54,10 +56,6 @@ const handleBackPress = () => {
 
   const handleSettingPress = () => {
     navigate('/settings'); 
-  };
-
-  const handleEditPress = () => {
-    navigate('/editProfile'); 
   };
 
 const handleButtonPress = (button) => {
@@ -86,7 +84,7 @@ const handleButtonPress = (button) => {
 useEffect(() => {
   const fetchProfileData = async () => {
     try {
-      const response = await axios.get(API_ENDPOINTS.profile, { withCredentials: true }); 
+      const response = await axios.get(API_ENDPOINTS.a_profile(id), { withCredentials: true }); 
       setProfileData(response.data); 
       setImageUri(response.data.profile_image); 
     } catch (error) {
@@ -101,7 +99,7 @@ useEffect(() => {
 useEffect(() => {
   const fetchUserPlays = async () => {
     try {
-      const userPlaysUrl = API_ENDPOINTS.user_plays(profileData.id); 
+      const userPlaysUrl = API_ENDPOINTS.user_plays(id); 
       const response = await axios.get(userPlaysUrl);
       setPlays({ played: response.data.plays });  
     } catch (error) {
@@ -109,14 +107,15 @@ useEffect(() => {
     }
   };
 
-  if (profileData.id) {
+  if (id) {
     fetchUserPlays();  
   }
-}, [profileData.id]);
+}, [id]);
 
 const fetchUserGames = async () => {
   try {
-    const response = await axios.get(API_ENDPOINTS.user_games(profileData.id), { withCredentials: true });
+    const response = await axios.get(API_ENDPOINTS.user_games(id), { withCredentials: true });
+    setGames(response.data.games);
     if (response?.data?.games) {
       setGames(response.data.games);
     } else {
@@ -127,15 +126,11 @@ const fetchUserGames = async () => {
   }
 };
 
-
   return (
     <View style={styles.container}>
-         <TouchableOpacity style={styles.setButton} onPress={handleSettingPress}>
-    <CustomText style={styles.setButtonText}>⋯</CustomText>
-  </TouchableOpacity>
-     <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-              <CustomText style={styles.backButtonText}>&lt;</CustomText>
-     </TouchableOpacity>
+<TouchableOpacity style={styles.backButton} onPress={() => navigate(-1)}>
+        <CustomText style={styles.backButtonText}>&lt;</CustomText>
+</TouchableOpacity>
 
      <View style={styles.winsContainer}>
       <Image
@@ -144,15 +139,6 @@ const fetchUserGames = async () => {
         />
         <CustomText style={styles.wins}>{allProfileData.wins}</CustomText>
      </View>
-
-
-     <TouchableOpacity style={styles.editContainer} onPress={handleEditPress}>
-      <Image
-        source={require('./assets/edit.png')} 
-        style={styles.editImage}
-        />
-     </TouchableOpacity>
-
 
      <View style={styles.playsContainer}>
         <CustomText style={styles.plays}>{plays.played}</CustomText>
@@ -195,7 +181,7 @@ const fetchUserGames = async () => {
      
           <View style={styles.viewContainer}>
         {selectedButton === 'button1' ? (
-          <Text style={styles.viewText}>no assets created</Text>
+          <Text style={styles.viewText}>no assets created</Text> 
         ) : (
           <FlatList
             data={games}
@@ -246,8 +232,8 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 75,
     marginBottom: 20,
-    resizeMode: 'cover', 
-    backgroundColor: '#CE55F2',
+    resizeMode: 'cover',
+    backgroundColor: '#CE55F2', 
   },
   username: {
     fontSize: 28, 

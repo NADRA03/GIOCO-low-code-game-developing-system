@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import FontLoader from './FontLoader'; 
 import { NativeRouter, Route, Routes } from 'react-router-native';
+import SignInScreen from './SignInScreen';
 import SignUpScreen from './SignUpScreen';
 import Home from './Home'; 
 import Craft from './Craft'; 
@@ -18,7 +19,11 @@ import Folder from './Folder';
 import Map from './Map';
 import Search from './Search';
 import MarioGame from './run2';
+import EditProfile from './edit_profile';
+import ReportProblem from './report';
+import A_Profile from './a_profile';
 import ErrorBoundary from './ErrorBoundary';
+import EditAccount from './editAccount';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,7 +34,8 @@ export default function App() {
         {/* Wrap your Routes component with the ErrorBoundary */}
         <ErrorBoundary>
           <Routes>
-            <Route path="/" element={<SignUpScreen />} />
+            <Route path="/" element={<SignInScreen />} />
+            <Route path="/signUp" element={<SignUpScreen />} />
             <Route path="/home" element={<Home />} />
             <Route path="/craft" element={<Craft />} />
             <Route path="/run" element={<Run />} />
@@ -37,13 +43,17 @@ export default function App() {
             <Route path="/game" element={<Game />} />
             <Route path="/play" element={<PlayScreen />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/a_profile/:id" element={<A_Profile />} />
             <Route path="/select" element={<SelectGameType />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/assets/:id" element={<Assets />} />
             <Route path="/folder/:id" element={<Folder />} />
             <Route path="/developer/:id" element={<Developer />} />
             <Route path="/Map/:id" element={<Map />} />
-            <Route path="Search" element={<Search />} />
+            <Route path="/Search" element={<Search />} />
+            <Route path="/editProfile" element={<EditProfile />} />
+            <Route path="/editAccount" element={<EditAccount />} />
+            <Route path="/report" element={<ReportProblem />} />
           </Routes>
         </ErrorBoundary>
       </FontLoader>
