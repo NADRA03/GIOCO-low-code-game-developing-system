@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { useNavigate } from 'react-router-native';
+import axios from 'axios';
+import API_ENDPOINTS from './api';
 
 export default function EditAccount() {
   const [editingEmail, setEditingEmail] = useState(false);
@@ -11,16 +13,29 @@ export default function EditAccount() {
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSaveEmail = () => {
+  // Function to update email
+  const handleSaveEmail = async () => {
     if (!email) {
       alert('Please enter a valid email.');
       return;
     }
-    alert('Email updated successfully!');
-    setEditingEmail(false);
+
+    try {
+      const response = await axios.post(
+        API_ENDPOINTS.edit_email,
+        { newEmail: email },
+        { withCredentials: true }
+      );
+      alert(response.data.message);
+      setEditingEmail(false);
+    } catch (error) {
+      console.error('Error updating email:', error.response?.data || error.message);
+      alert(error.response?.data?.message || 'Failed to update email.');
+    }
   };
 
-  const handleSavePassword = () => {
+  // Function to update password
+  const handleSavePassword = async () => {
     if (!currentPassword || !newPassword || !confirmNewPassword) {
       alert('Please fill in all fields.');
       return;
@@ -31,86 +46,97 @@ export default function EditAccount() {
       return;
     }
 
-    alert('Password updated successfully!');
-    setEditingPassword(false);
+    try {
+      const response = await axios.post(
+        API_ENDPOINTS.edit_password,
+        { oldPassword: currentPassword, newPassword },
+        { withCredentials: true }
+      );
+      alert(response.data.message);
+      setEditingPassword(false);
+    } catch (error) {
+      console.error('Error updating password:', error.response?.data || error.message);
+      alert(error.response?.data?.message || 'Failed to update password.');
+    }
   };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
-         <TouchableOpacity style={styles.backButton} onPress={() => navigate(-1)}>
-                 <Text style={styles.backButtonText}>&lt;</Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigate(-1)}>
+          <Text style={styles.backButtonText}>&lt;</Text>
         </TouchableOpacity>
+
         <View style={styles.sections}>
-        {/* Edit Email Section */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Email</Text>
-          {editingEmail ? (
-            <>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter new email"
-                placeholderTextColor="#777"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-              />
-              <TouchableOpacity style={styles.saveButton} onPress={handleSaveEmail}>
-                <Text style={styles.saveButtonText}>Submit</Text>
+          {/* Edit Email Section */}
+          <View style={styles.section}>
+            <Text style={styles.label}>Email</Text>
+            {editingEmail ? (
+              <>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter new email"
+                  placeholderTextColor="#777"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                />
+                <TouchableOpacity style={styles.saveButton} onPress={handleSaveEmail}>
+                  <Text style={styles.saveButtonText}>Submit</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <TouchableOpacity style={styles.editButton} onPress={() => setEditingEmail(true)}>
+                <Text style={styles.editButtonText}>Edit Email</Text>
               </TouchableOpacity>
-            </>
-          ) : (
-            <TouchableOpacity style={styles.editButton} onPress={() => setEditingEmail(true)}>
-              <Text style={styles.editButtonText}>Edit Email</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+            )}
+          </View>
 
-        {/* Edit Password Section */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Password</Text>
-          {editingPassword ? (
-            <>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter current password"
-                placeholderTextColor="#777"
-                value={currentPassword}
-                onChangeText={setCurrentPassword}
-                secureTextEntry
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Enter new password"
-                placeholderTextColor="#777"
-                value={newPassword}
-                onChangeText={setNewPassword}
-                secureTextEntry
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm new password"
-                placeholderTextColor="#777"
-                value={confirmNewPassword}
-                onChangeText={setConfirmNewPassword}
-                secureTextEntry
-              />
-              <TouchableOpacity style={styles.saveButton} onPress={handleSavePassword}>
-                <Text style={styles.saveButtonText}>Submit</Text>
+          {/* Edit Password Section */}
+          <View style={styles.section}>
+            <Text style={styles.label}>Password</Text>
+            {editingPassword ? (
+              <>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter current password"
+                  placeholderTextColor="#777"
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  secureTextEntry
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter new password"
+                  placeholderTextColor="#777"
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  secureTextEntry
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Confirm new password"
+                  placeholderTextColor="#777"
+                  value={confirmNewPassword}
+                  onChangeText={setConfirmNewPassword}
+                  secureTextEntry
+                />
+                <TouchableOpacity style={styles.saveButton} onPress={handleSavePassword}>
+                  <Text style={styles.saveButtonText}>Submit</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <TouchableOpacity style={styles.editButton} onPress={() => setEditingPassword(true)}>
+                <Text style={styles.editButtonText}>Edit Password</Text>
               </TouchableOpacity>
-            </>
-          ) : (
-            <TouchableOpacity style={styles.editButton} onPress={() => setEditingPassword(true)}>
-              <Text style={styles.editButtonText}>Edit Password</Text>
-            </TouchableOpacity>
-          )}
+            )}
+          </View>
         </View>
-        </View>
-
       </View>
     </TouchableWithoutFeedback>
   );
 }
+
 
 const styles = StyleSheet.create({
     sections: {

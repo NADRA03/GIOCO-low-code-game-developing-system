@@ -62,6 +62,248 @@ const passwordValidator = (password) => {
   return true;
 };
 
+app.post('/edit_game', sessionMiddleware, async (req, res) => {
+  const { gameId, privacy, serve, suspend, image, name, description } = req.body;
+  const userId = req.user.id; // Get user ID from session
+
+  // Check if gameId is provided
+  if (!gameId) {
+    return res.status(400).json({ message: 'Game ID is required.' });
+  }
+
+  // Construct the query dynamically based on which fields are provided
+  const updateFields = [];
+  const updateValues = [];
+
+  // Ensure that the user is authorized to edit this game
+  const gameCheckQuery = 'SELECT user_id FROM game WHERE id = ?';
+  db.get(gameCheckQuery, [gameId], (err, row) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+
+    if (!row || row.user_id !== userId) {
+      return res.status(403).json({ message: 'You are not authorized to edit this game.' });
+    }
+
+    // Add the fields to update if they exist in the request body
+    if (privacy !== undefined) {
+      updateFields.push('privacy = ?');
+      updateValues.push(privacy);
+    }
+    if (serve !== undefined) {
+      updateFields.push('serve = ?');
+      updateValues.push(serve);
+    }
+    if (suspend !== undefined) {
+      updateFields.push('suspend = ?');
+      updateValues.push(suspend);
+    }
+    if (image) {
+      updateFields.push('image = ?');
+      updateValues.push(image);
+    }
+    if (name) {
+      updateFields.push('name = ?');
+      updateValues.push(name);
+    }
+    if (description) {
+      updateFields.push('description = ?');
+      updateValues.push(description);
+    }
+
+    // If no fields to update, return an error
+    if (updateFields.length === 0) {
+      return res.status(400).json({ message: 'No fields to update.' });
+    }
+
+    // Combine the update fields into a single SQL query
+    const updateQuery = `
+      UPDATE game
+      SET ${updateFields.join(', ')}
+      WHERE id = ?
+    `;
+    updateValues.push(gameId); // Add the gameId at the end
+
+    // Execute the update query
+    db.run(updateQuery, updateValues, function (err) {
+      if (err) {
+        console.error('Database update error:', err);
+        return res.status(500).json({ message: 'Internal server error.' });
+      }
+
+      res.json({ message: 'Game updated successfully.' });
+    });
+  });
+});
+
+app.post('/join_game', sessionMiddleware, async (req, res) => {
+  const userId = req.user.id; 
+  const { gameId } = req.body; 
+
+  if (!gameId) {
+    return res.status(400).json({ message: 'Game ID is required' });
+  }
+
+  try {
+    // Check if the user already joined this game
+    const checkQuery = `
+      SELECT id FROM server WHERE game_id = ? AND user_id = ?
+    `;
+
+    db.get(checkQuery, [gameId, userId], (err, existingEntry) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+
+      if (existingEntry) {
+        return res.json({ message: 'Already joined the game' }); 
+      }
+
+      // Insert new entry if not already joined
+      const insertQuery = `
+        INSERT INTO server (game_id, user_id)
+        VALUES (?, ?)
+      `;
+
+      db.run(insertQuery, [gameId, userId], function (err) {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ message: 'Internal server error' });
+        }
+
+        res.json({ message: 'Successfully joined the game', serverId: this.lastID });
+      });
+    });
+  } catch (error) {
+    console.error('Error joining game:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.get('/get_games_by_session', sessionMiddleware, async (req, res) => {
+  const userId = req.user.id; 
+
+  try {
+    const query = `
+      SELECT game.*
+      FROM server
+      INNER JOIN game ON server.game_id = game.id
+      WHERE server.user_id = ?
+    `;
+
+    db.all(query, [userId], (err, games) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+
+      res.json(games || []); 
+    });
+  } catch (error) {
+    console.error('Error fetching games:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.post('/edit-email', sessionMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { newEmail } = req.body;
+
+  if (!newEmail) {
+    return res.status(400).json({ message: 'New email is required.' });
+  }
+
+  try {
+    // Check if the email is already in use
+    const checkEmailQuery = 'SELECT * FROM user WHERE email = ?';
+    db.get(checkEmailQuery, [newEmail], (err, existingUser) => {
+      if (err) {
+        console.error('Database query error:', err);
+        return res.status(500).json({ message: 'Internal server error.' });
+      }
+
+      if (existingUser) {
+        return res.status(409).json({ message: 'Email is already in use.' });
+      }
+
+      // Update the email in the database
+      const updateEmailQuery = 'UPDATE user SET email = ? WHERE id = ?';
+      db.run(updateEmailQuery, [newEmail, userId], function (err) {
+        if (err) {
+          console.error('Error updating email:', err);
+          return res.status(500).json({ message: 'Internal server error.' });
+        }
+
+        res.status(200).json({ message: 'Email updated successfully!' });
+      });
+    });
+  } catch (error) {
+    console.error('Error updating email:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+});
+
+// Function to edit password
+app.post('/edit-password', sessionMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword) {
+    return res.status(400).json({ message: 'Old and new passwords are required.' });
+  }
+
+  // Validate new password strength
+  if (!passwordValidator(newPassword)) {
+    return res.status(400).json({
+      message:
+        'Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character.',
+    });
+  }
+
+  try {
+    // Get the user's current password hash from the database
+    const getUserQuery = 'SELECT password FROM user WHERE id = ?';
+    db.get(getUserQuery, [userId], async (err, user) => {
+      if (err) {
+        console.error('Database query error:', err);
+        return res.status(500).json({ message: 'Internal server error.' });
+      }
+
+      if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+      }
+
+      // Verify the old password
+      const validPassword = await argon2.verify(user.password, oldPassword);
+      if (!validPassword) {
+        return res.status(401).json({ message: 'Incorrect old password.' });
+      }
+
+      // Hash the new password
+      const hashedPassword = await argon2.hash(newPassword);
+
+      // Update the password in the database
+      const updatePasswordQuery = 'UPDATE user SET password = ? WHERE id = ?';
+      db.run(updatePasswordQuery, [hashedPassword, userId], function (err) {
+        if (err) {
+          console.error('Error updating password:', err);
+          return res.status(500).json({ message: 'Internal server error.' });
+        }
+
+        res.status(200).json({ message: 'Password updated successfully!' });
+      });
+    });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+});
+
 app.post('/signup', async (req, res) => {
   const { email, username, password, google_id, dateOfBirth } = req.body;
 
@@ -374,12 +616,13 @@ app.post('/logout', (req, res) => {
   });
 });
 
+module.exports = { sessionMiddleware }; 
 
 //////routing//////// 
 app.use('/user', userService); 
 app.use('/game', gameService); 
-
 const PORT = 3000;
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

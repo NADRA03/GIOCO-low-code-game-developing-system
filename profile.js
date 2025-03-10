@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Text}  from 'react-native';
+import { View, StyleSheet, Text, ScrollView}  from 'react-native';
 import { Image } from 'expo-image';
 import { TouchableOpacity, FlatList  } from 'react-native';
 import CustomText from './CustomText';
@@ -15,6 +15,7 @@ export default function Profile() {
   
 const [profileData, setProfileData] = useState({ username: '', profile_image: '', id: 0 })
 const [plays, setPlays] = useState({ played: 0})
+const [drawAssets, setDrawAssets] = useState([]); 
 const [imageUri, setImageUri] = useState(null);
 const navigate = useNavigate();
 const [selectedButton, setSelectedButton] = useState('button1'); 
@@ -67,6 +68,11 @@ const handleButtonPress = (button) => {
       fetchUserGames(); 
     }
   };
+
+  useEffect(() => {
+    fetchDrawAssets();
+  }, [profileData.id]);
+
 
 //all profile data
 // useEffect(() => {
@@ -127,6 +133,60 @@ const fetchUserGames = async () => {
     setGames([]);
   }
 };
+
+const fetchDrawAssets = async () => {
+  try {
+    const response = await axios.get(API_ENDPOINTS.get_draws(profileData.id));
+
+    if (response.data && response.data.length > 0) {
+      const assetsWithUrls = await Promise.all(
+        response.data.map(async (asset) => {
+          let assetPath = asset.image || asset.sound;
+          assetPath = decodeURIComponent(assetPath);
+          assetPath = assetPath.replace(/%2F/g, '/');
+          const assetDetails = {
+            id: asset.id,
+            name: asset.name,
+            type: asset.image ? 'image' : 'sound',
+          };
+
+          try {
+            const assetRef = ref(storage, assetPath);
+            const url = await getDownloadURL(assetRef);
+            assetDetails.url = url; 
+          } catch (firebaseError) {
+            assetDetails.url = null; 
+          }
+
+          return assetDetails;
+        })
+      );
+
+      // Filter out assets with null URLs
+      setDrawAssets(assetsWithUrls.filter(asset => asset.url !== null));
+    } else {
+      setDrawAssets(null); // Set null to indicate no assets
+    }
+  } catch (error) {
+    console.error('Error fetching draw assets:', error);
+  }
+};
+
+const deleteAsset = async (assetId) => {
+  try {
+      const response = await axios.delete(API_ENDPOINTS.delete_asset(assetId));
+      if (response.data.message === 'Asset deleted successfully.') {
+          console.log('Asset deleted successfully.');
+      } else {
+          console.error('Error deleting asset:', response.data.message);
+          alert('Error deleting asset.');
+      }
+  } catch (error) {
+      console.error('Error deleting asset:', error);
+      alert('Error deleting asset.');
+  }
+};
+
 
 
   return (
@@ -196,7 +256,32 @@ const fetchUserGames = async () => {
      
           <View style={styles.viewContainer}>
         {selectedButton === 'button1' ? (
-          <Text style={styles.viewText}>no assets created</Text>
+          <>
+          <View style={styles.assetsContainer}>
+  { drawAssets && drawAssets.length === 0 ? (
+    <CustomText style={styles.noAssetsText}>No draws available</CustomText>
+  ) : (
+    <ScrollView contentContainerStyle={styles.assetsContainer}>
+      {drawAssets && drawAssets.map((asset) => (
+        <View key={asset.id} style={styles.assetItem}>
+          {asset.type === 'image' ? (
+            <Image source={{ uri: asset.url }} style={styles.image} />
+          ) : (
+            <CustomText>{asset.name}</CustomText>
+          )}
+          {/* Delete Button */}
+          <TouchableOpacity
+            onPress={() => deleteAsset(asset.id)}
+            style={styles.deleteButton}
+          >
+            <CustomText style={styles.deleteButtonText}>Delete</CustomText>
+          </TouchableOpacity>
+        </View>
+      ))}
+    </ScrollView>
+  )}
+</View>
+    </>
         ) : (
           <FlatList
             data={games}
@@ -210,8 +295,10 @@ const fetchUserGames = async () => {
                   />
                   <View style={styles.textContainer}>
                     <CustomText style={styles.gameName}>{item.game_name}</CustomText>
-                    <CustomText style={styles.gameStats}>Plays: {item.plays}</CustomText>
-                    <CustomText style={styles.gameStats}>Likes: {item.likes}</CustomText>
+                    <View style={styles.infoContainer}>
+                    {/* <CustomText style={styles.gameStats}>Plays {item.plays}</CustomText>
+                    <CustomText style={styles.gameStats}>Likes {item.likes}</CustomText> */}
+                    </View>
                   </View>
               </View>
               </TouchableOpacity>
@@ -225,6 +312,8 @@ const fetchUserGames = async () => {
 }
 
 const styles = StyleSheet.create({
+  infoContainer: {
+  },
   //back
   backButton: {
     left: 20,
@@ -374,7 +463,7 @@ const styles = StyleSheet.create({
         width: 40, 
         height: 40,
         borderRadius: 75,
-        marginRight: 10, // Space between image and text
+        marginRight: 16, // Space between image and text
         resizeMode: 'contain', 
       },
       gameItem: {
@@ -383,19 +472,73 @@ const styles = StyleSheet.create({
         alignItems: 'center', // Center vertically
         padding: 10, // Optional: Add spacing around each item
         borderBottomWidth: 1, 
-        borderBottomColor: '#000000',
+        borderBottomColor: '#262626',
       },
       textContainer: {
         flex: 1, // Allow text to take up remaining space
       },
       gameName: {
         fontSize: 25,
-        fontWeight: 'bold',
-        marginBottom: 10, // Space between name and stats
+        fontWeight: 'bold', // Space between name and stats
       },
       gameStats: {
-        fontSize: 16,
-        // color: '#555', 
+        fontSize: 15,
+        marginBottom: 5,
+        color: '#262626', 
+      },
+      assetsContainer: {
+        padding: 16,
+      },
+      sectionTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+      },
+      additionalStyle: {
+        marginBottom: 16,
+      },
+      noAssetsText: {
+        fontSize: 18,
+        color: 'gray',
+      },
+      assetsContainer: {
+        paddingVertical: 10,
+      },
+      assetItem: {
+        marginBottom: 15,
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#262626',
+      },
+      image: {
+        width: 100,
+        height: 100,
+        borderRadius: 8,
+        marginBottom: 10,
+      },
+      vipIconContainer: {
+        position: 'absolute',
+        top: 5,
+        right: 5,
+        backgroundColor: 'red',
+        paddingHorizontal: 6,
+        paddingVertical: 3,
+        borderRadius: 5,
+      },
+      vipIconText: {
+        color: 'white',
+        fontSize: 10,
+      },
+      deleteButton: {
+        marginTop: 10,
+        backgroundColor: 'transparent',
+        paddingVertical: 8,
+        alignItems: 'center',
+      },
+      deleteButtonText: {
+        color: 'rgba(255, 0, 0, 1)',
+        fontSize: 20,
+        textDecorationLine: 'underline',
+        textAlign: 'center',
       },
 
 });

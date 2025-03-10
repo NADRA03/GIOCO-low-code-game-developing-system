@@ -8,6 +8,7 @@ import API_ENDPOINTS from './api';
 import { useNavigate} from 'react-router-native';
 
 const Folder = ({ id }) => {
+    const [drawAssets, setDrawAssets] = useState([]); 
     const [lastAssets, setLastCollectedAssets] = useState([]);
     const [GameAssets, setGameAssets] = useState([]);
     const [gameId, setGameId] = useState(null);
@@ -125,19 +126,54 @@ const Folder = ({ id }) => {
               const filteredAssets = assets.filter(asset => asset !== null);
               setGameAssets(filteredAssets);
             } else {
-              alert('No assets found for this game.');
             }
           } catch (error) {
-            console.error('Error fetching game assets:', error);
           }
         };
     
+const fetchDrawAssets = async () => {
+  if (!user_id) return;
+
+  try {
+    const response = await axios.get(API_ENDPOINTS.get_draws(user_id));
+
+    if (response.data && response.data.length > 0) {
+      const assetsWithUrls = await Promise.all(
+        response.data.map(async (asset) => {
+          let assetPath = asset.image || asset.sound;
+          assetPath = decodeURIComponent(assetPath);
+          assetPath = assetPath.replace(/%2F/g, '/');
+
+          try {
+            const assetRef = ref(storage, assetPath);
+            const url = await getDownloadURL(assetRef);
+            return {
+              id: asset.id,
+              name: asset.name,
+              url,
+              type: asset.image ? 'image' : 'sound',
+            };
+          } catch (firebaseError) {
+            console.warn(`Asset URL not found for ${asset.name}:`, firebaseError);
+            return null;
+          }
+        })
+      );
+
+      setDrawAssets(assetsWithUrls.filter(asset => asset !== null));
+    } else {
+      setDrawAssets(null); // Set null to indicate no assets
+    }
+  } catch (error) {
+  }
+};
 
         const reloading = async () => {
             setLoading(true);
             try {
                 await fetchAssets();
                 await fetchGameAssets();
+                await  fetchDrawAssets();
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching assets:', error);
@@ -276,6 +312,28 @@ useEffect(() => {
             ))}
             </ScrollView>
             )}
+            {/* Draws Assets Section */}
+            <CustomText style={[styles.sectionTitle, styles.additionalStyle]}>Draws</CustomText>
+            {drawAssets.length === 0 ? (
+                <CustomText style={styles.noAssetsText}>no draws</CustomText>  // Fallback message if no draws
+            ) : (
+                <ScrollView horizontal contentContainerStyle={styles.assetsContainer}>
+                    {drawAssets.map((asset) => (
+                        <TouchableOpacity key={asset.id} onPress={() => handleSelectAsset(asset)} style={styles.imageContainer}>
+                            {asset.type === 'image' ? (
+                                <Image source={{ uri: asset.url }} style={styles.image} />
+                            ) : (
+                                <CustomText>{asset.name} (Sound)</CustomText>
+                            )}
+                            {asset.url.includes('$') && (
+                                <View style={styles.vipIconContainer}>
+                                    <CustomText style={styles.vipIconText}>VIP</CustomText>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+          )}
         {/* Game Assets Section */}
         <CustomText style={[styles.sectionTitle, styles.additionalStyle]}>Game Assets</CustomText>
         {GameAssets.length === 0 ? (
@@ -357,16 +415,20 @@ deleteButtonText: {
 },
     noAssetsText:{
     color: 'rgba(255, 0, 0, 0.7)',
-    textAlign: 'center',
+    marginLeft: '150',
     fontSize: 15,
     marginTop: 10,
+
     },
     container: {
         flex: 1,
         backgroundColor: '#000000',
+        alignItems: 'flex-start', 
+        width: '100%'
     },
     scrollView: {
         paddingBottom: 20,
+        width: '100%'
     },
     Title: {
         fontSize: 30,
@@ -404,8 +466,10 @@ deleteButtonText: {
         backgroundColor: '#505050', 
         paddingTop: 10,
         margin: 0, 
+        width: '100%',
     },
     loadingContainer: {
+        marginLeft: '100',
         alignItems: 'center',
         justifyContent: 'center',
         flex: 1,

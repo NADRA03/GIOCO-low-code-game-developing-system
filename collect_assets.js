@@ -25,13 +25,11 @@ export const handleCollectAsset = async (asset, user_id, gameId = null) => {
 
         // Process image or sound based on the file extension
         if (['png', 'jpg', 'jpeg'].includes(assetExtension)) {
-            image = `${folderName}/${fileName}`;  // Keep the folder name for image
-            image = image.replace(/^o\//, '');
-            image = image.replace(/~2F/g, '/');
+            // Encode the image URL, replacing '/' with '%2F'
+            image = encodeURIComponent(`${folderName}/${fileName}`);
         } else if (['mp3', 'wav'].includes(assetExtension)) {
-            sound = `${folderName}/${fileName}`;  // Keep the folder name for sound
-            sound = sound.replace(/^o\//, '');
-            sound = sound.replace(/~2F/g, '/');
+            // Encode the sound URL, replacing '/' with '%2F'
+            sound = encodeURIComponent(`${folderName}/${fileName}`);
         }
 
         // Construct the request body with or without the game_id

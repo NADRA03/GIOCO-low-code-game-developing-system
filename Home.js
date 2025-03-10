@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, StyleSheet, Animated, Easing} from 'react-native';
+import { View, StyleSheet, Animated, Easing, ScrollView} from 'react-native';
 import { Image } from 'expo-image';
 import { TouchableOpacity } from 'react-native';
 import CustomText from './CustomText';
@@ -15,6 +15,7 @@ const { imageSource, handleImageError } = useProfile();
 const [profileData, setProfileData] = useState({ username: '', profile_image: '' })
 const navigate = useNavigate();
 const moveAnim = new Animated.Value(0);
+const [topGames, setTopGames] = useState([]);
 
 
 useEffect(() => {
@@ -30,6 +31,9 @@ useEffect(() => {
 
   fetchProfileData();
 }, []);
+
+const handleSelectGame = (game) => {
+};
 
 
 useEffect(() => {
@@ -76,6 +80,24 @@ const handleSearchPress = () => {
 const handleMapGamePress = () => {
         navigate('/run2'); 
       };
+const handleDashboardPress = () => {
+        navigate('/dashboard'); 
+      };
+
+useEffect(() => {
+        const fetchTopGames = async () => {
+            try {
+                const response = await axios.get(API_ENDPOINTS.top_10_most_liked_games);
+                setTopGames(response.data);
+            } catch (error) {
+                console.error('Error fetching top games:', error);
+            }
+        };
+    
+        fetchTopGames();
+}, []);
+
+const [imageError, setImageError] = useState(false);
     
   return (
     <View style={styles.container}>
@@ -114,7 +136,7 @@ const handleMapGamePress = () => {
           style={styles.editImage}
         />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.dashboardButton} >
+      <TouchableOpacity style={styles.dashboardButton} onPress={handleDashboardPress}>
       <CustomText style={styles.dashboardButtonText}>Dashboard</CustomText>
       </TouchableOpacity>
 
@@ -123,6 +145,20 @@ const handleMapGamePress = () => {
         <View style={styles.section}>
           <CustomText style={styles.title}>Recommended For You</CustomText>
           {/* Add content for user search here */}
+          {topGames.length === 0 ? (
+        <CustomText style={styles.noGamesText}>No recommended games</CustomText>
+    ) : (
+        <ScrollView horizontal contentContainerStyle={styles.gamesContainer}>
+            {topGames.map((game) => (
+                <TouchableOpacity key={game.id} onPress={() => handleSelectGame(game)} style={styles.gameItem}>
+                    <Image  source={imageError ? require('./assets/gamelogo.png') : { uri: game.image_url }} 
+                style={styles.gameImage} 
+                onError={() => setImageError(true)}  />
+                    <CustomText style={styles.gameName}>{game.name}</CustomText>
+                </TouchableOpacity>
+            ))}
+        </ScrollView>
+    )}
           <TouchableOpacity style={styles.gameButton} onPress={handleMapGamePress}>
           <CustomText style={styles.gameButtonText}>Try This Game!</CustomText>
         </TouchableOpacity>
@@ -137,7 +173,16 @@ const handleMapGamePress = () => {
         {/* Third Container */}
         <View style={styles.section}>
           <CustomText style={styles.title}>Explore</CustomText>
-          {/* Add content for code search here */}
+          <ScrollView horizontal contentContainerStyle={styles.gamesContainer}>
+            {topGames.map((game) => (
+                <TouchableOpacity key={game.id} onPress={() => handleSelectGame(game)} style={styles.gameItem}>
+                    <Image  source={imageError ? require('./assets/gamelogo.png') : { uri: game.image_url }} 
+                style={styles.gameImage} 
+                onError={() => setImageError(true)}  />
+                    <CustomText style={styles.gameName}>{game.name}</CustomText>
+                </TouchableOpacity>
+            ))}
+        </ScrollView>
         </View>
       </View>
       {/* <TouchableOpacity style={styles.gameButton} onPress={handleGamePress}>
@@ -160,6 +205,36 @@ const handleMapGamePress = () => {
 }
 
 const styles = StyleSheet.create({
+  noGamesText: {
+    fontSize: 18,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 20,
+},
+gamesContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+},
+gameItem: {
+    width: 120, 
+    marginRight: 15,
+    alignItems: 'center',
+},
+gameImage: {
+    width: 50,
+    height: 50,
+    borderRadius: '50%',
+    resizeMode: 'cover',
+    backgroundColor: '#CE55F2', // Placeholder background
+},
+gameName: {
+    marginTop: 5,
+    fontSize: 14,
+    color: '#333',
+    textAlign: 'center',
+    fontWeight: 'bold',
+},
   profileButton: {
     position: 'absolute',
     backgroundColor: 'transparent',

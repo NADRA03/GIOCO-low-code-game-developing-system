@@ -25,11 +25,11 @@ const Assets = ({ id }) => {
     useEffect(() => {
         async function fetchAllProfileData() {
             try {
-                const response = await axios.get(API_ENDPOINTS.profile_all, {
+                const response = await axios.get(API_ENDPOINTS.all_profile, {
                     withCredentials: true
                 });
                 setAllProfileData(response.data.user);
-                setUserId(response.data.user.id); // Extract and set user_id
+                setUserId(response.data.id); // Extract and set user_id
             } catch (error) {
                 console.error('Error fetching profile data:', error);
             }
@@ -391,6 +391,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#333',
         color: '#FFF',
         padding: 10,
+        width: '100%'
     },
     noAssetsText:{
     color: 'rgba(255, 0, 0, 0.7)',

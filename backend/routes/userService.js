@@ -2,6 +2,27 @@ const express = require('express');
 const db = require('../db/database'); 
 const router = express.Router(); 
 
+router.get('/get_draws/:userId', (req, res) => {
+  console.log('here');
+  const { userId } = req.params; 
+
+  const query = `
+      SELECT * FROM asset 
+      WHERE user_id = ? 
+      AND (image LIKE '%draw%' OR sound LIKE '%draw%')
+      GROUP BY image, sound
+  `;
+
+  db.all(query, [userId], (err, rows) => {
+      if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ message: 'Internal server error' });
+      }
+
+      res.json(rows); 
+  });
+});
+
 router.post('/send_report', (req, res) => {
   console.log("Sending report");
 
@@ -167,6 +188,8 @@ router.get('/get_last_10_assets_for_user/:user_id', (req, res) => {
     SELECT * 
     FROM asset
     WHERE user_id = ?
+    AND (image IS NOT NULL OR sound IS NOT NULL)  -- Ensure there is either image or sound
+    GROUP BY image, sound  -- Group by image and sound to ensure uniqueness
     ORDER BY id DESC
     LIMIT 10
   `;
@@ -184,6 +207,7 @@ router.get('/get_last_10_assets_for_user/:user_id', (req, res) => {
     });
   });
 });
+
 
 router.post('/check_user_collected_asset', (req, res) => {
   console.log("here");

@@ -24,6 +24,7 @@ import ReportProblem from './report';
 import A_Profile from './a_profile';
 import ErrorBoundary from './ErrorBoundary';
 import EditAccount from './editAccount';
+import Dashboard from './dashboard';
 
 const Stack = createNativeStackNavigator();
 
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/craft" element={<Craft />} />
             <Route path="/run" element={<Run />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/run2" element={<MarioGame/>} />
             <Route path="/game" element={<Game />} />
             <Route path="/play" element={<PlayScreen />} />
