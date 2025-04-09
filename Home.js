@@ -12,10 +12,12 @@ import { useNavigate } from 'react-router-native';
 
 export default function Home() {
 const { imageSource, handleImageError } = useProfile();
+const [selectedGame, setSelectedGame] = useState(null);
 const [profileData, setProfileData] = useState({ username: '', profile_image: '' })
 const navigate = useNavigate();
 const moveAnim = new Animated.Value(0);
 const [topGames, setTopGames] = useState([]);
+const [loading, setLoading] = useState(false);
 
 
 useEffect(() => {
@@ -33,7 +35,56 @@ useEffect(() => {
 }, []);
 
 const handleSelectGame = (game) => {
+  setSelectedGame(game);
 };
+
+const handleCloseBox = () => {
+  setSelectedGame(null);
+  setLoading(false);
+};
+
+const handleJoinGame = async () => { 
+  if (!selectedGame || !selectedGame.id) {
+    alert("No game selected");
+    return;
+  }
+
+  const gameId = selectedGame.id; // Get the gameId from the selected game
+  setLoading(true);
+
+  try {
+    const response = await axios.post(API_ENDPOINTS.join_game(gameId), {}, { withCredentials: true });
+    navigate(`/dashboard/gameServer/${gameId}/${false}`); 
+  } catch (error) {
+    setLoading(false);
+    console.error('Error joining game:', error);
+    alert('Error joining the game');
+  }
+
+  setLoading(false);
+};
+
+const handlePlay = async () => { 
+  if (!selectedGame || !selectedGame.id) {
+    alert("No game selected");
+    return;
+  }
+
+  const gameId = selectedGame.id; // Get the gameId from the selected game
+  setLoading(true);
+
+  try {
+    const response = await axios.post(API_ENDPOINTS.join_game(gameId), {}, { withCredentials: true });
+      navigate(`/runGame?id=${gameId}`); 
+  } catch (error) {
+    setLoading(false);
+    console.error('Error joining game:', error);
+    alert('Error joining the game');
+  }
+
+  setLoading(false);
+};
+
 
 
 useEffect(() => {
@@ -78,7 +129,7 @@ const handleSearchPress = () => {
         navigate('/search'); 
       };
 const handleMapGamePress = () => {
-        navigate('/run2'); 
+        navigate('/runGame?id=default'); 
       };
 const handleDashboardPress = () => {
         navigate('/dashboard'); 
@@ -148,7 +199,7 @@ const [imageError, setImageError] = useState(false);
           {topGames.length === 0 ? (
         <CustomText style={styles.noGamesText}>No recommended games</CustomText>
     ) : (
-        <ScrollView horizontal contentContainerStyle={styles.gamesContainer}>
+        <ScrollView horizontal contentContainerStyle={styles.gamesContainer} showsHorizontalScrollIndicator={false}>
             {topGames.map((game) => (
                 <TouchableOpacity key={game.id} onPress={() => handleSelectGame(game)} style={styles.gameItem}>
                     <Image  source={imageError ? require('./assets/gamelogo.png') : { uri: game.image_url }} 
@@ -173,7 +224,7 @@ const [imageError, setImageError] = useState(false);
         {/* Third Container */}
         <View style={styles.section}>
           <CustomText style={styles.title}>Explore</CustomText>
-          <ScrollView horizontal contentContainerStyle={styles.gamesContainer}>
+          <ScrollView horizontal contentContainerStyle={styles.gamesContainer}     showsHorizontalScrollIndicator={false}>
             {topGames.map((game) => (
                 <TouchableOpacity key={game.id} onPress={() => handleSelectGame(game)} style={styles.gameItem}>
                     <Image  source={imageError ? require('./assets/gamelogo.png') : { uri: game.image_url }} 
@@ -200,11 +251,92 @@ const [imageError, setImageError] = useState(false);
       > */}
       {/* </Animated.View> */}
     </View>
+
+    {selectedGame && (
+  <View style={styles.boxContainer}>
+    <TouchableOpacity style={styles.closeButton} onPress={handleCloseBox}>
+      <CustomText style={styles.closeText}>X</CustomText>
+    </TouchableOpacity>
+
+    <Image  source={imageError ? require('./assets/gamelogo.png') : { uri: selectedGame.image_url }} 
+                style={styles.gameImageBox} 
+                onError={() => setImageError(true)}  />
+
+    <CustomText style={styles.gameTitle}>{selectedGame.name}</CustomText>
+
+    <View style={styles.buttonContainer}>
+      <TouchableOpacity style={styles.serverButton} onPress={handleJoinGame} disabled={loading}>
+        <CustomText style={styles.buttonText}>{loading ? 'joining..' : 'server'}</CustomText>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.playButton} onPress={handlePlay}>
+      <CustomText style={styles.playButtonText}>&#124;&gt;</CustomText>
+      </TouchableOpacity>
     </View>
+  </View>
+)}
+    </View>
+
+    
   );
 }
 
 const styles = StyleSheet.create({
+  boxContainer: {
+    position: 'absolute',
+    top: '40%',
+    left: '10%',
+    right: '10%',
+    backgroundColor: 'rgba(100, 65, 165, 0.7)',
+    padding: 10,
+    alignItems: 'center',
+  },
+  gameImageBox: {
+    width: 70,
+    height: 70,
+    borderRadius: '50%',
+    resizeMode: 'cover',
+    backgroundColor: '#CE55F2', // Placeholder background
+},
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 5,
+  },
+  gameTitle: {
+    marginTop: 20,
+    fontSize: 20,
+    marginBottom: 20,
+    color: 'white',
+  },
+  closeText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  serverButton: {
+    // backgroundColor: '#007BFF',
+    padding: 10,
+    marginTop: 12,
+  },
+  playButton: {
+    // backgroundColor: '#28A745',
+    padding: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  playButtonText: {
+    color: '#28A745',
+    fontWeight: 'bold',
+    fontSize: 30,
+  },
   noGamesText: {
     fontSize: 18,
     color: '#888',
@@ -230,8 +362,8 @@ gameImage: {
 },
 gameName: {
     marginTop: 5,
-    fontSize: 14,
-    color: '#333',
+    fontSize: 15,
+    color: 'white',
     textAlign: 'center',
     fontWeight: 'bold',
 },
@@ -373,7 +505,7 @@ gameName: {
     },
     title: {
       padding: 10,
-      fontSize: 18,
+      fontSize: 15,
       color: 'white',
       fontFamily: 'Minecraft Regular',
     },

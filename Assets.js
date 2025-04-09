@@ -250,13 +250,13 @@ const handleSearch = (text) => {
             <View style={styles.container}>
             <CustomText style={styles.Title}>Assets</CustomText>
             {/* Search Bar */}
-            <TextInput
+            {/* <TextInput
                 style={styles.searchBar}
                 placeholder="Search assets..."
                 placeholderTextColor="#AAA"
                 value={searchQuery}
                 onChangeText={handleSearch}
-            />
+            /> */}
             <ScrollView contentContainerStyle={styles.scrollView}>
             {/* Only show loaded assets and remove loading message */}
             {loading ? (
@@ -407,6 +407,7 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
     },
     Title: {
+        marginBottom: 20,
         fontSize: 30,
         // marginTop: 40,
         marginVertical: 0,
@@ -415,7 +416,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 20,
-        marginLeft: 20,
+        marginLeft: 10,
         marginVertical: 20,
         textAlign: 'left',
         color: '#FFFFFF',

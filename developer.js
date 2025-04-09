@@ -5,6 +5,7 @@ import Craft from './Craft';
 import Assets from './Assets'; 
 import Folder from './Folder';
 import Map from './Map'; 
+import SetGame from './SetGame';
 import { useNavigate, useParams } from 'react-router-native';
 // import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
@@ -51,6 +52,8 @@ export default function Developer() {
         navigate('/craft');
       case 'Map':
         return <Map id={id} />;
+      case 'Set':
+        return <SetGame id={id} />;
       case 'Folder':
         return <Folder id={id} />;
       case 'Home':
@@ -70,6 +73,9 @@ export default function Developer() {
               <CustomText style={styles.backButtonText}>&lt;</CustomText>
         </TouchableOpacity>
           <View style={styles.sidebarContent}>
+          <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Set')}>
+              <CustomText style={styles.sidebarButtonText}>Set</CustomText>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Assets')}>
               <CustomText style={styles.sidebarButtonText}>Assets</CustomText>
             </TouchableOpacity>

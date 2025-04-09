@@ -30,6 +30,7 @@ router.get('/top_10_most_liked_games', async (req, res) => {
   }
 });
 
+
 router.get('/game_details/:gameId', async (req, res) => {
   const gameId = req.params.gameId; 
 

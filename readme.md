@@ -63,6 +63,7 @@ SketchPlay
 #CE55F2
 rgba(206, 85, 242, 0.5)
 #6441a5
+rgba(100, 65, 165, 0.7)
 fontFamily: 'Minecraft Regular'
 import CustomText from './CustomText';
 

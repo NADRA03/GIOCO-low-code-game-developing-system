@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Image, StyleSheet, Modal, Button, ScrollView, Text, ActivityIndicator, TextInput, } from 'react-native';
+import { View, TouchableOpacity, Image, StyleSheet, ScrollView, TouchableWithoutFeedback, Keyboard, Modal, Button, Text, ActivityIndicator, TextInput, } from 'react-native';
 import { storage } from './firebaseConfig';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import CustomText from './CustomText';
@@ -7,6 +7,8 @@ import axios from 'axios';
 import API_ENDPOINTS from './api';
 import { useNavigate} from 'react-router-native';
 import ImageViewer from 'react-native-image-zoom-viewer'
+import { uploadBytes, getBlob, deleteObject } from 'firebase/storage';
+import { Alert } from 'react-native';
 
 
 const Map = ({ id }) => {
@@ -18,6 +20,8 @@ const [selectedAsset, setSelectedAsset] = useState(null);
 const [mapLength, setMapLength] = useState(null);
 const [isLengthModalVisible, setLengthModalVisible] = useState(true);
 const [mapObjects, setMapObjects] = useState([]);
+const [jsonContent, setJsonContent] = useState('{}');
+const [isJsonModalVisible, setJsonModalVisible] = useState(false);
 
 useEffect(() => {
         setGameId(id); 
@@ -85,17 +89,61 @@ const placeAssetOnMap = (type, width, height) => {
     setSelectedAsset(null);
 };
 
+const handleJsonFileClick = async () => {
+    const jsonPath = `json/${id}.json`;
+    const jsonRef = ref(storage, jsonPath);
+
+    try {
+        const blob = await getBlob(jsonRef);
+        const text = await blob.text();
+        setJsonContent(text);
+    } catch (error) {
+        console.log('No file found. Creating a new one...');
+        const defaultJson = '{}';
+        const blob = new Blob([defaultJson], { type: 'application/json' });
+        await uploadBytes(jsonRef, blob);
+        setJsonContent(defaultJson);
+    }
+
+    setJsonModalVisible(true);
+};
+
+const saveJsonOnClose = async () => {
+    try {
+        // Validate JSON syntax
+        const parsed = JSON.parse(jsonContent); // this will throw if invalid
+
+        const jsonPath = `json/${id}.json`;
+        const jsonRef = ref(storage, jsonPath);
+
+        // Create blob from the valid JSON string
+        const blob = new Blob([JSON.stringify(parsed, null, 2)], {
+            type: 'application/json',
+        });
+
+        // Upload to Firebase
+        await uploadBytes(jsonRef, blob);
+
+        // Close modal if successful
+        setJsonModalVisible(false);
+    } catch (error) {
+        console.error('Invalid JSON or error saving:', error);
+        Alert.alert('Invalid JSON', 'Please fix the JSON syntax before saving.');
+    }
+};
+
 return (
+     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
     <View style={styles.container}>
 
             <CustomText style={styles.Title}>Map</CustomText>
             <View style={styles.code}>
-                <TouchableOpacity style={[styles.button, styles.codeButton]}>
-                    <CustomText style={styles.buttonText}>{'{'}  {'}'}</CustomText>
-                </TouchableOpacity>
+<TouchableOpacity style={[styles.button, styles.codeButton]} onPress={handleJsonFileClick}>
+    <CustomText style={styles.buttonText}>{'{'}  {'}'}</CustomText>
+</TouchableOpacity>
 
                 <TouchableOpacity style={[styles.button, styles.codeButton]} >
-                    <CustomText style={styles.buttonText}>javaScript</CustomText>
+                    <CustomText style={[styles.buttonText, styles.yellowButton]}>javaScript</CustomText>
                 </TouchableOpacity>
             </View>
 
@@ -153,11 +201,81 @@ return (
                 </ScrollView>
             </View>
         )}
+        <Modal
+  visible={isJsonModalVisible}
+  animationType="slide"
+  transparent={true} // so the map behind stays visible
+  onRequestClose={saveJsonOnClose}
+>
+  <View style={styles.halfModalContainer}>
+    <View style={styles.halfModalInner}>
+      <TouchableOpacity onPress={saveJsonOnClose} style={styles.modalCloseIcon}>
+        <Text style={styles.modalCloseText}>X</Text>
+      </TouchableOpacity>
+
+      <ScrollView style={styles.jsonEditorContainer}>
+        <TextInput
+          style={styles.jsonEditor}
+          multiline
+          value={jsonContent}
+          onChangeText={setJsonContent}
+        />
+      </ScrollView>
     </View>
+  </View>
+</Modal>
+    </View>
+    </TouchableWithoutFeedback>
 );
 };    
 
 const styles = StyleSheet.create({
+halfModalContainer: {
+  flex: 1,
+  justifyContent: 'flex-end', // show at bottom
+  backgroundColor: 'rgba(0, 0, 0, 0.3)', // slight overlay, optional
+},
+
+halfModalInner: {
+  height: '60%',
+  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  padding: 20,
+},
+
+modalCloseIcon: {
+  position: 'absolute',
+  right: 15,
+  top: 15,
+  zIndex: 10,
+},
+
+modalCloseText: {
+  fontFamily:"Minecraft Regular",
+  color: 'white',
+  fontSize: 25,
+},
+
+modalTitle: {
+  color: 'white',
+  fontSize: 20,
+  marginBottom: 20,
+  textAlign: 'center',
+},
+
+jsonEditor: {
+  flex: 1,
+  height: 380,
+  backgroundColor: 'rgba(255, 255, 255, 1)',
+  fontFamily:"Minecraft Regular",
+  marginTop: 40,
+  marginBottom: 30,
+  marginLeft: 10,
+  marginRight: 10,
+  fontSize: 16,
+  padding: 10,
+  color: '#000',
+  textAlignVertical: 'top',
+},
     sidebarImage: {
         width: 60,
         height: 60,
@@ -241,8 +359,10 @@ const styles = StyleSheet.create({
     codeButton: {
         marginLeft: 30,
 
+    },
+    yellowButton: {
+        color: 'yellow'
     }
-
 
 });   
 

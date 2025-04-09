@@ -18,13 +18,14 @@ import Assets from './Assets';
 import Folder from './Folder';
 import Map from './Map';
 import Search from './Search';
-import MarioGame from './run2';
+import RunGame from './runGame';
 import EditProfile from './edit_profile';
 import ReportProblem from './report';
 import A_Profile from './a_profile';
 import ErrorBoundary from './ErrorBoundary';
 import EditAccount from './editAccount';
 import Dashboard from './dashboard';
+import GameServer from './gameServer';
 
 const Stack = createNativeStackNavigator();
 
@@ -35,13 +36,16 @@ export default function App() {
         {/* Wrap your Routes component with the ErrorBoundary */}
         <ErrorBoundary>
           <Routes>
+          <Route path="/dashboard/*" element={<Dashboard />}>
+            <Route path="gameServer/:id/:admin" element={<GameServer />} />
+          </Route>
             <Route path="/" element={<SignInScreen />} />
             <Route path="/signUp" element={<SignUpScreen />} />
             <Route path="/home" element={<Home />} />
             <Route path="/craft" element={<Craft />} />
             <Route path="/run" element={<Run />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/run2" element={<MarioGame/>} />
+            <Route path="/runGame" element={<RunGame/>} />
             <Route path="/game" element={<Game />} />
             <Route path="/play" element={<PlayScreen />} />
             <Route path="/profile" element={<Profile />} />

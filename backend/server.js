@@ -8,6 +8,18 @@ const path = require('path');
 const cors = require('cors');
 const app = express();
 const argon2 = require('argon2');
+const socketIo = require('socket.io');
+const http = require('http');
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+// Attach io instance to app
+app.set('io', io);
 
 //Services
 const userService = require('./routes/userService'); 
@@ -62,6 +74,174 @@ const passwordValidator = (password) => {
   return true;
 };
 
+app.get('/get_notifications', sessionMiddleware, async (req, res) => {
+  const userId = req.user.id;
+
+  if (!userId) {
+    return res.status(400).json({ message: 'User ID is required' });
+  }
+
+  const query = `SELECT * FROM messages WHERE user_id = ? AND (accept != 1 AND reject != 1) ORDER BY date DESC`;
+
+  db.all(query, [userId], (err, rows) => {
+    if (err) {
+      console.error('Error fetching notifications:', err);
+      return res.status(500).json({ message: 'Failed to fetch notifications' });
+    }
+
+    res.json({
+      notifications: rows,
+    });
+  });
+});
+
+app.post('/create_notification', (req, res) => {
+  const { user_id, text, game_id = null, accept = 0, reject = 0 } = req.body;
+
+  if (!user_id || !text) {
+    return res.status(400).json({ message: 'user_id and text are required' });
+  }
+
+  // Automatically generate the current date and time in ISO format
+  const date = new Date().toISOString();
+
+  const query = `INSERT INTO messages (user_id, text, game_id, date, accept, reject) VALUES (?, ?, ?, ?, ?, ?)`;
+
+  db.run(query, [user_id, text, game_id, date, accept, reject], function (err) {
+    if (err) {
+      console.error('Error creating notification:', err);
+      return res.status(500).json({ message: 'Failed to create notification' });
+    }
+
+    res.json({ message: 'Notification created successfully', notification_id: this.lastID });
+  });
+});
+
+
+
+app.get('/get_comments_for_game/:gameId', async (req, res) => {
+  const { gameId } = req.params;
+
+  // Basic validation for gameId
+  if (!gameId) {
+    return res.status(400).json({ message: 'Game ID is required' });
+  }
+
+  try {
+    const query = `SELECT * FROM comment WHERE game_id = ? ORDER BY date_and_time DESC`;
+
+    // Run the query to get comments for the specific game
+    db.all(query, [gameId], (err, rows) => {
+      if (err) {
+        console.error('Error fetching comments:', err);
+        return res.status(500).json({ message: 'Failed to fetch comments' });
+      }
+
+      // Return the comments in a response
+      res.json({
+        comments: rows,
+      });
+    });
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.post('/write_comment', sessionMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { gameId, text, gif } = req.body;
+
+  if (!gameId || !text) {
+    return res.status(400).json({ message: 'Game ID and text are required' });
+  }
+
+  try {
+    const insertQuery = `
+      INSERT INTO comment (user_id, game_id, text, gif)
+      VALUES (?, ?, ?, ?)
+    `;
+
+    db.run(insertQuery, [userId, gameId, text, gif || null], function (err) {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ message: 'Failed to add comment' });
+      }
+
+      const newComment = {
+        id: this.lastID,
+        userId,
+        gameId,
+        text,
+        gif: gif || null,
+        date_and_time: new Date().toISOString()
+      };
+
+      // Emit to all connected clients
+      const io = req.app.get('io');
+      io.emit('new_comment', newComment);
+
+      res.json({
+        message: 'Comment added successfully',
+        ...newComment
+      });
+    });
+  } catch (error) {
+    console.error('Error writing comment:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+app.get('/top_10_most_liked_games', sessionMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id; // Access user ID after passing sessionMiddleware
+
+    const query = `
+      SELECT * 
+      FROM game 
+      WHERE privacy = 0 
+        AND suspend = 0
+        AND user_id != ?  -- Exclude user's own games
+      ORDER BY likes DESC 
+      LIMIT 10
+    `;
+
+    db.all(query, [userId], (err, games) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+      
+      res.json(games || []);
+    });
+  } catch (error) {
+    console.error('Error fetching top 10 games:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.get('/session_user_made_games', sessionMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  try {
+      // Get all games for the user
+      const getGamesQuery = `SELECT * FROM game WHERE user_id = ?`;
+
+      db.all(getGamesQuery, [userId], (err, rows) => {
+        if (err) {
+          console.error('Database query error:', err);
+          return res.status(500).json({ message: 'Internal server error.' });
+        }
+
+        res.status(200).json({ games: rows });
+      });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+});
+
+
 app.post('/edit_game', sessionMiddleware, async (req, res) => {
   const { gameId, privacy, serve, suspend, image, name, description } = req.body;
   const userId = req.user.id; // Get user ID from session
@@ -100,10 +280,6 @@ app.post('/edit_game', sessionMiddleware, async (req, res) => {
       updateFields.push('suspend = ?');
       updateValues.push(suspend);
     }
-    if (image) {
-      updateFields.push('image = ?');
-      updateValues.push(image);
-    }
     if (name) {
       updateFields.push('name = ?');
       updateValues.push(name);
@@ -138,9 +314,9 @@ app.post('/edit_game', sessionMiddleware, async (req, res) => {
   });
 });
 
-app.post('/join_game', sessionMiddleware, async (req, res) => {
+app.post('/join_game/:gameId', sessionMiddleware, async (req, res) => {
   const userId = req.user.id; 
-  const { gameId } = req.body; 
+  const { gameId } = req.params; 
 
   if (!gameId) {
     return res.status(400).json({ message: 'Game ID is required' });

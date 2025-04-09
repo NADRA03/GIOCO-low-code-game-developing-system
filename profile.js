@@ -460,25 +460,24 @@ const styles = StyleSheet.create({
         fontSize: 35,
       },
       gameImage: {
-        width: 40, 
-        height: 40,
+        width: 50, 
+        height: 50,
+        backgroundColor: 'rgba(80, 80, 80, 0.5)',
         borderRadius: 75,
         marginRight: 16, // Space between image and text
-        resizeMode: 'contain', 
+        resizeMode: 'cover', 
       },
       gameItem: {
         width: '100%',
         flexDirection: 'row', // Align items horizontally
         alignItems: 'center', // Center vertically
         padding: 10, // Optional: Add spacing around each item
-        borderBottomWidth: 1, 
-        borderBottomColor: '#262626',
       },
       textContainer: {
         flex: 1, // Allow text to take up remaining space
       },
       gameName: {
-        fontSize: 25,
+        fontSize: 20,
         fontWeight: 'bold', // Space between name and stats
       },
       gameStats: {

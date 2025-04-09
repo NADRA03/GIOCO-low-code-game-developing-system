@@ -1,12 +1,16 @@
 import { useRef } from 'react';
 import { WebView } from 'react-native-webview';
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
-import { useNavigate } from 'react-router-native';
 import CustomText from './CustomText';
+import { useNavigate, useLocation } from 'react-router-native';
 
-const MarioGame = () => {
+const RunGame = () => {
   const webViewRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const urlParams = new URLSearchParams(location.search);
+  const id = urlParams.get('id');
+  console.log(id);
 
   // JavaScript to disable scrolling in the WebView content
   const injectedJavaScript = `
@@ -91,7 +95,7 @@ const MarioGame = () => {
         <WebView
   ref={webViewRef}
   originWhitelist={['*']}
-  source={{ uri: 'http://172.20.10.5:3001' }}
+  source={{ uri: 'http://192.168.0.100:3001?id=${id}' }}
   style={styles.webView}
   scrollEnabled={false}
   showsVerticalScrollIndicator={false}
@@ -135,4 +139,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MarioGame;
+export default RunGame;
