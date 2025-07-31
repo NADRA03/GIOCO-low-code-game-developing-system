@@ -15,7 +15,7 @@
 - **Pixel Art Editor** – Frame-by-frame sprite editor with onion-skinning
 - **Public Profiles** – Share games you've made, your achievements, and your favorites
 
-## 🚀 Getting Started
+## Getting Started
 
 ### start frontend
 npx expo start
@@ -47,29 +47,29 @@ npx expo install expo@latest
 
 ## Preview
 
-![view2](./readme/Picture2.png)  
-![view3](./readme/Picture3.png)  
-![view4](./readme/Picture4.png)  
-![view5](./readme/Picture5.png)  
-![view6](./readme/Picture6.png)  
-![view7](./readme/Picture7.png)  
-![view8](./readme/Picture8.png)  
-![view9](./readme/Picture9.png)  
-![view10](./readme/Picture10.png)  
-![view11](./readme/Picture11.png)  
-![view12](./readme/Picture12.png)  
-![view13](./readme/Picture13.png)  
-![view14](./readme/Picture14.png)  
-![view15](./readme/Picture15.png)  
-![view16](./readme/Picture16.png)  
-![view17](./readme/Picture17.png)  
-![view18](./readme/Picture18.png)  
-![view19](./readme/Picture19.png)  
-![view20](./readme/Picture20.png)  
-![view21](./readme/Picture21.png)  
-![view22](./readme/Picture22.png)  
-![view23](./readme/Picture23.png)  
-![view24](./readme/Picture24.png)
+![view2](./readme/Picture2.jpg)  
+![view3](./readme/Picture3.jpg)  
+![view4](./readme/Picture4.jpg)  
+![view5](./readme/Picture5.jpg)  
+![view6](./readme/Picture6.jpg)  
+![view7](./readme/Picture7.jpg)  
+![view8](./readme/Picture8.jpg)  
+![view9](./readme/Picture9.jpg)  
+![view10](./readme/Picture10.jpg)  
+![view11](./readme/Picture11.jpg)  
+![view12](./readme/Picture12.jpg)  
+![view13](./readme/Picture13.jpg)  
+![view14](./readme/Picture14.jpg)  
+![view15](./readme/Picture15.jpg)  
+![view16](./readme/Picture16.jpg)  
+![view17](./readme/Picture17.jpg)  
+![view18](./readme/Picture18.jpg)  
+![view19](./readme/Picture19.jpg)  
+![view20](./readme/Picture20.jpg)  
+![view21](./readme/Picture21.jpg)  
+![view22](./readme/Picture22.jpg)  
+![view23](./readme/Picture23.jpg)  
+![view24](./readme/Picture24.jpg)
 
 ## Contributing
 
