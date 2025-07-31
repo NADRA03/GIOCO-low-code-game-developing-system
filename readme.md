@@ -15,26 +15,20 @@
 - **Pixel Art Editor** – Frame-by-frame sprite editor with onion-skinning
 - **Public Profiles** – Share games you've made, your achievements, and your favorites
 
-
 ## 🚀 Getting Started
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/yourusername/gioco.git
-   cd gioco
-   ```
+### start frontend
+npx expo start
 
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+### start backend
+cd backend
+nodemon server.js
 
-3. **Start the Dev Server**
-   ```bash
-   npm run dev
-   ```
+### dependencies
+npm install
 
-4. Open your browser at `http://localhost:3000`
+### expo latest 
+npx expo install expo@latest
 
 ## Tech Stack
 
@@ -51,9 +45,38 @@
 - AI-assisted level design  
 - Community asset marketplace  
 
+## Preview
+
+![view2](./readme/picture2.png)  
+![view3](./readme/picture3.png)  
+![view4](./readme/picture4.png)  
+![view5](./readme/picture5.png)  
+![view6](./readme/picture6.png)  
+![view7](./readme/picture7.png)  
+![view8](./readme/picture8.png)  
+![view9](./readme/picture9.png)  
+![view10](./readme/picture10.png)  
+![view11](./readme/picture11.png)  
+![view12](./readme/picture12.png)  
+![view13](./readme/picture13.png)  
+![view14](./readme/picture14.png)  
+![view15](./readme/picture15.png)  
+![view16](./readme/picture16.png)  
+![view17](./readme/picture17.png)  
+![view18](./readme/picture18.png)  
+![view19](./readme/picture19.png)  
+![view20](./readme/picture20.png)  
+![view21](./readme/picture21.png)  
+![view22](./readme/picture22.png)  
+![view23](./readme/picture23.png)  
+![view24](./readme/picture24.png)
 
 ## Contributing
 
 Have ideas or want to help improve Gioco? Feel free to fork the repo and submit a pull request!
 
+🧑‍💻 Created by 
 
+**Malak Ahmed**  
+Full-stack developer & cybersecurity enthusiast
+(https://github.com/NADRA03)
