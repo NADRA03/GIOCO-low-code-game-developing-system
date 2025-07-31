@@ -5,7 +5,7 @@ import CustomText from './CustomText';
 import { useNavigate, useLocation } from 'react-router-native';
 import { API_ENDPOINTS, API_BASE_URL_HTML }  from './api';
 
-const RunGame = () => {
+const CraftPixelArt = () => {
   const webViewRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,15 +16,8 @@ const RunGame = () => {
   console.log(`http://192.168.0.100:3001?id=${id}`);
   // JavaScript to disable scrolling in the WebView content
   const injectedJavaScript = `
-  // Add meta tags to disable zooming and scaling
-  const meta = document.createElement('meta');
-  meta.name = 'viewport';
-  meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-  document.head.appendChild(meta);
 
-  // Disable scrolling in WebView content
-  document.body.style.overflow = 'hidden';
-  document.documentElement.style.overflow = 'hidden';
+
 
   // Disable long-press, pinch-zoom, and gestures
   document.addEventListener('contextmenu', e => {
@@ -110,16 +103,14 @@ const RunGame = () => {
         <WebView
   ref={webViewRef}
   originWhitelist={['*']}
-  source={{ uri: `${API_BASE_URL_HTML}?id=${id}` }}
+  source={{ uri: `${API_BASE_URL_HTML}/Image-to-Pixel-main/index.html` }}
   style={styles.webView}
-  scrollEnabled={false}
   showsVerticalScrollIndicator={false}
   showsHorizontalScrollIndicator={false}
   injectedJavaScript={injectedJavaScript}
   automaticallyAdjustContentInsets={false}
   keyboardDisplayRequiresUserAction={false}
   javaScriptEnabled={true}
-  disableScrollViewPanResponder={true}
   allowFileAccess
   // Add these props to block gestures
   allowsLinkPreview={false}
@@ -150,8 +141,8 @@ const styles = StyleSheet.create({
   webView: {
     marginTop: 140,
     backgroundColor: '#000000',
-    bottom: 50,
+    bottom: 30,
   },
 });
 
-export default RunGame;
+export default CraftPixelArt;

@@ -5,15 +5,16 @@ import CustomText from './CustomText';
 import { useNavigate, useLocation } from 'react-router-native';
 import { API_ENDPOINTS, API_BASE_URL_HTML }  from './api';
 
-const RunGame = () => {
+const DevGame = () => {
   const webViewRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const urlParams = new URLSearchParams(location.search);
   const id = urlParams.get('id');
   console.log(id);
+
+  console.log(`http://192.168.0.110:3001?id=${id}&dev=true`);
   
-  console.log(`http://192.168.0.100:3001?id=${id}`);
   // JavaScript to disable scrolling in the WebView content
   const injectedJavaScript = `
   // Add meta tags to disable zooming and scaling
@@ -110,7 +111,7 @@ const RunGame = () => {
         <WebView
   ref={webViewRef}
   originWhitelist={['*']}
-  source={{ uri: `${API_BASE_URL_HTML}?id=${id}` }}
+  source={{ uri: `${API_BASE_URL_HTML}?id=${id}&dev=true` }}
   style={styles.webView}
   scrollEnabled={false}
   showsVerticalScrollIndicator={false}
@@ -150,8 +151,8 @@ const styles = StyleSheet.create({
   webView: {
     marginTop: 140,
     backgroundColor: '#000000',
-    bottom: 50,
+    bottom: 30,
   },
 });
 
-export default RunGame;
+export default DevGame;

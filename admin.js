@@ -6,21 +6,22 @@ import Assets from './Assets';
 import Folder from './Folder';
 import Map from './Map'; 
 import SetGame from './SetGame';
-import CraftPixelArt from './pixelArt';
+import ManageGames from './manageGames';
+import ManageUsers from './manageUsers';
+import ManageReports from './manageReports';
 import { useNavigate, useParams } from 'react-router-native';
 // import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
-export default function Developer() {
+export default function Admin() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const [activePage, setActivePage] = useState('Home'); 
+  const [activePage, setActivePage] = useState('Home'); // State to store the selected page
   const sidebarAnimation = useRef(new Animated.Value(-250)).current;
   const navigate = useNavigate();
-  const { id } = useParams();
 
 
   useEffect(() => {
     Animated.timing(sidebarAnimation, {
-      toValue: sidebarVisible ? 0 : -120, 
+      toValue: sidebarVisible ? 0 : -120, // Slide in or out
       duration: 300,
       useNativeDriver: true,
     }).start();
@@ -44,33 +45,17 @@ export default function Developer() {
     navigate('/craft'); 
   };
 
-   
-  const setDevelopMode = () => {
-    navigate(`/devGame?id=${id}`);
-  };
-
-  const setMnipulator = () => {
-    navigate('/pixelArt');
-  };
-
 
   const renderContent = () => {
     switch (activePage) {
-      case 'Assets':
-        return <Assets id={id} />;
-      case 'Board':
-        navigate('/craft');
-      case 'Board2':
-        navigate('/pixelArt');
-      case 'Map':
-        navigate(`/devGame?id=${id}`);
-      case 'Set':
-        return <SetGame id={id} />;
-      case 'Folder':
-        return <Folder id={id} />;
-      case 'Home':
+      case 'Game':
+        return <ManageGames />;
+      case 'User':
+        return <ManageUsers />;
+      case 'Report':
+        return <ManageReports />;
       default:
-        return <Image source={require('./assets/logo.png')} resizeMode="contain" style={styles.logo} />
+        return <Image source={require('./assets/mod.png')} resizeMode="contain" style={styles.logo} />
     }
   };
 
@@ -85,27 +70,20 @@ export default function Developer() {
               <CustomText style={styles.backButtonText}>&lt;</CustomText>
         </TouchableOpacity>
           <View style={styles.sidebarContent}>
-          <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Set')}>
-              <CustomText style={styles.sidebarButtonText}>Set</CustomText>
+          <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Game')}>
+              <CustomText style={styles.sidebarButtonText}>Game</CustomText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Assets')}>
-              <CustomText style={styles.sidebarButtonText}>Assets</CustomText>
+            <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('User')}>
+              <CustomText style={styles.sidebarButtonText}>User</CustomText>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sidebarButton} onPress={setBoard}>
-              <CustomText style={styles.sidebarButtonText}>Board</CustomText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.sidebarButton} onPress={setMnipulator}>
-              <CustomText style={styles.sidebarButtonText}>Manipulator</CustomText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.sidebarButton} onPress={setDevelopMode}>
-              <CustomText style={styles.sidebarButtonText}>Map</CustomText>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Folder')}>
-              <Image source={require('./assets/folder.png')} resizeMode="contain" style={styles.sidebarImage} />
+            <TouchableOpacity style={styles.sidebarButton} onPress={() => setActivePage('Report')}>
+              <CustomText style={styles.sidebarButtonText}>Report</CustomText>
             </TouchableOpacity>
           </View>
         </Pressable>
       </Animated.View>
+      
+      {/* Main content area where selected pages will be rendered */}
       <View style={styles.mainContent}>
         {renderContent()}
       </View>
@@ -167,7 +145,7 @@ const styles = StyleSheet.create({
     paddingBottom: 50
   },
   sidebarButtonText: {
-    fontSize: 25,
+    fontSize: 20,
     color: '#ffffff',
   },
   sidebarImage: {
@@ -180,8 +158,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 110,
-    height: 110,
+    width: 80,
+    height: 80,
+    bottom: 370,
     opacity: 0.6, 
   }
 });

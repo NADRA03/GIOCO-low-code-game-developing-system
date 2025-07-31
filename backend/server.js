@@ -26,7 +26,7 @@ const userService = require('./routes/userService');
 const gameService = require('./routes/gameService'); // Importing profile routes
 app.use(cors({
   // origin: 'http://172.20.10.1:8081',                ///////////here//////////////
-  origin: 'http://192.168.0.104:8081',
+  origin: ['http://172.20.10.1:8081', 'http://localhost:8081', 'http://localhost:3001', 'http://192.168.0.110:3001'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -93,6 +93,102 @@ app.get('/get_notifications', sessionMiddleware, async (req, res) => {
       notifications: rows,
     });
   });
+});
+
+app.get('/admin-search', sessionMiddleware, (req, res) => {
+  const role = req.user?.role;
+
+  if (role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Admins only' });
+  }
+
+  const { name, code, username, report } = req.query;
+
+  if (name) {
+    db.all('SELECT id, name, description, suspend, image FROM game WHERE name = ?', [name], (err, rows) => {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      return res.json(rows);
+    });
+  } else if (code) {
+    db.get('SELECT id, name, description, suspend, image FROM game WHERE game_code = ?', [code], (err, row) => {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      return res.json(row || {}); // handle null
+    });
+  } else if (username) {
+    db.get('SELECT id, username, email, suspend, profile_image FROM user WHERE username = ?', [username], (err, row) => {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      return res.json(row || {});
+    });
+  } else if (report) {
+    db.all('SELECT id, date, seen, problem, answer FROM report WHERE problem LIKE ?', [`%${report}%`], (err, rows) => {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      return res.json(rows);
+    });
+  } else {
+    // If no specific query, return all games, users, and reports
+    const results = {};
+    db.all('SELECT id, name, description, suspend, image FROM game', [], (err, gameRows) => {
+      if (err) return res.status(500).json({ error: 'Database error on games' });
+      results.games = gameRows;
+
+      db.all('SELECT id, username, email, suspend, profile_image FROM user', [], (err, userRows) => {
+        if (err) return res.status(500).json({ error: 'Database error on users' });
+        results.users = userRows;
+
+        db.all('SELECT id, date, seen, problem, answer FROM report', [], (err, reportRows) => {
+          if (err) return res.status(500).json({ error: 'Database error on reports' });
+          results.reports = reportRows;
+
+          return res.json(results);
+        });
+      });
+    });
+  }
+});
+
+app.post('/admin-suspend', sessionMiddleware, (req, res) => {
+  const role = req.user?.role;
+  // Check if the user is an admin
+  if (role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Admins only' });
+  }
+
+  // Extract the parameters from the request body
+  const { type, id } = req.body;  // Expecting 'type' to be either 'game', 'user', or 'report'
+
+  if (!type || !id) {
+    return res.status(400).json({ message: 'Missing required parameters' });
+  }
+
+  console.log('Suspending:', { type, id });
+
+  // Handle suspending a game
+  if (type === 'game') {
+    db.run('UPDATE game SET suspend = 1 WHERE id = ?', [id], function (err) {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      if (this.changes === 0) return res.status(404).json({ message: 'Game not found' });
+      return res.json({ message: 'Game suspended successfully' });
+    });
+
+  // Handle suspending a user
+  } else if (type === 'user') {
+    db.run('UPDATE user SET suspend = 1 WHERE id = ?', [id], function (err) {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      if (this.changes === 0) return res.status(404).json({ message: 'User not found' });
+      return res.json({ message: 'User suspended successfully' });
+    });
+
+  // Handle marking a report as seen
+  } else if (type === 'report') {
+    db.run('UPDATE report SET seen = 1 WHERE id = ?', [id], function (err) {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      if (this.changes === 0) return res.status(404).json({ message: 'Report not found' });
+      return res.json({ message: 'Report marked as seen' });
+    });
+
+  } else {
+    return res.status(400).json({ message: 'Invalid type parameter. Must be "game", "user", or "report".' });
+  }
 });
 
 app.post('/create_notification', (req, res) => {
@@ -314,6 +410,67 @@ app.post('/edit_game', sessionMiddleware, async (req, res) => {
   });
 });
 
+app.post('/add_asset', sessionMiddleware, (req, res) => {
+  const { name, image, sound, game_id } = req.body;
+  const userId = req.user?.id;
+  console.log("heeeeeeeereeeeeeee");
+  if (!userId) {
+    return res.status(401).json({ message: 'Unauthorized: User not logged in.' });
+  }
+
+  // Check if the game exists if game_id is provided
+  const insertAsset = () => {
+    const insertQueryWithGame = `
+      INSERT INTO asset (private, name, user_id, image, sound, game_id)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    const insertQueryWithoutGame = `
+      INSERT INTO asset (private, name, user_id, image, sound)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+
+    if (game_id) {
+      const gameCheckQuery = 'SELECT id FROM game WHERE id = ?';
+      db.get(gameCheckQuery, [game_id], (err, gameRow) => {
+        if (err) {
+          console.error('Database query error:', err);
+          return res.status(500).json({ message: 'Internal server error.' });
+        }
+
+        if (!gameRow) {
+          return res.status(404).json({ message: 'Game not found.' });
+        }
+
+        db.run(insertQueryWithGame, [true, name, userId, image || null, sound || null, game_id], function (err) {
+          if (err) {
+            console.error('Database insert error:', err);
+            return res.status(500).json({ message: 'Internal server error.' });
+          }
+
+          res.status(201).json({
+            message: 'Asset added successfully.',
+            asset_id: this.lastID,
+          });
+        });
+      });
+    } else {
+      db.run(insertQueryWithoutGame, [true, name, userId, image || null, sound || null], function (err) {
+        if (err) {
+          console.error('Database insert error:', err);
+          return res.status(500).json({ message: 'Internal server error.' });
+        }
+
+        res.status(201).json({
+          message: 'Asset added successfully.',
+          asset_id: this.lastID,
+        });
+      });
+    }
+  };
+
+  insertAsset();
+});
+
 app.post('/join_game/:gameId', sessionMiddleware, async (req, res) => {
   const userId = req.user.id; 
   const { gameId } = req.params; 
@@ -422,6 +579,63 @@ app.post('/edit-email', sessionMiddleware, async (req, res) => {
     console.error('Error updating email:', error);
     res.status(500).json({ message: 'Internal server error.' });
   }
+});
+
+app.post('/add-play', sessionMiddleware, (req, res) => {
+  const userId = req.user?.id;
+  const { game_id, score } = req.body;
+
+  if (!userId) {
+    return res.status(401).json({ message: 'User not authenticated' });
+  }
+
+  if (!game_id || score === undefined) {
+    return res.status(400).json({ message: 'Missing required fields: game_id or score' });
+  }
+
+  const insertQuery = `
+    INSERT INTO play (user_id, game_id, score)
+    VALUES (?, ?, ?)
+  `;
+
+  db.run(insertQuery, [userId, game_id, score], function (err) {
+    if (err) {
+      console.error('Error adding play:', err);
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+
+    res.status(200).json({ message: 'Play entry added successfully!' });
+  });
+});
+
+app.get('/top-player', (req, res) => {
+  const gameId = req.query.game_id;
+
+  if (!gameId) {
+    return res.status(400).json({ message: 'Game ID is required.' });
+  }
+
+  const query = `
+    SELECT u.username, p.score
+    FROM play p
+    JOIN user u ON p.user_id = u.id
+    WHERE p.game_id = ?
+    ORDER BY p.score DESC
+    LIMIT 1
+  `;
+
+  db.get(query, [gameId], (err, row) => {
+    if (err) {
+      console.error('Error fetching top player:', err);
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+
+    if (!row) {
+      return res.status(200).json({ username: '-', score: '-' });
+    }
+
+    res.status(200).json({ username: row.username, score: row.score });
+  });
 });
 
 // Function to edit password
@@ -551,6 +765,77 @@ app.post('/signup', async (req, res) => {
   }
 });
 
+app.post('/add-admin', async (req, res) => {
+  const { email, username, password } = req.body;
+
+  // Validate required fields
+  if (!email || !username || !password) {
+    return res.status(400).json({ message: 'Email, username, and password are required.' });
+  }
+
+  // Validate password strength
+  if (!passwordValidator(password)) {
+    return res.status(400).json({
+      message:
+        'Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, one number, and one special character.',
+    });
+  }
+
+  try {
+    // Check for existing user
+    const checkQuery = 'SELECT * FROM user WHERE email = ? OR username = ?';
+    db.get(checkQuery, [email, username], async (err, existingUser) => {
+      if (err) {
+        console.error('Database query error:', err);
+        return res.status(500).json({ message: 'Internal server error.' });
+      }
+
+      if (existingUser) {
+        if (existingUser.email === email) {
+          return res.status(409).json({ message: 'Email is already in use.' });
+        }
+        if (existingUser.username === username) {
+          return res.status(409).json({ message: 'Username is already taken.' });
+        }
+      }
+
+      // Hash the password
+      const hashedPassword = await argon2.hash(password);
+
+      // Insert admin user with default values
+      const insertQuery = `
+        INSERT INTO user (email, username, password, google_id, date_of_birth, wins, role)
+        VALUES (?, ?, ?, NULL, '2000-01-01', 0, 'admin')
+      `;
+      db.run(insertQuery, [email, username, hashedPassword], function (err) {
+        if (err) {
+          console.error('Error inserting admin into database:', err);
+          return res.status(500).json({ message: 'Internal server error.' });
+        }
+
+        req.session.user = {
+          id: this.lastID,
+          email,
+          username,
+          role: 'admin',
+        };
+
+        req.session.save((err) => {
+          if (err) {
+            console.error('Error saving session:', err);
+            return res.status(500).json({ message: 'Failed to save session.' });
+          }
+
+          res.status(201).json({ message: 'Admin created successfully!', user: req.session.user });
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Error during admin creation:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+});
+
 app.put('/edit_user_profile', sessionMiddleware, (req, res) => {
   const userId = req.user.id;
   const updates = req.body;
@@ -614,7 +899,7 @@ app.get('/all_user_data', sessionMiddleware, (req, res) => {
   const userId = req.user.id; 
 
   const query = `
-    SELECT id, username, email, profile_image, date_of_birth, bio
+    SELECT id, username, email, profile_image, date_of_birth, bio, role
     FROM user
     WHERE id = ?
   `;
@@ -706,6 +991,7 @@ app.post('/login', async (req, res) => {
           id: user.id,
           username: user.username,
           profile_image: user.profile_image,
+          role:user.role
         };
 
         // Ensure the session is saved properly

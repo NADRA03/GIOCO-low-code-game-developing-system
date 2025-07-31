@@ -43,8 +43,8 @@ export default function SelectGameType() {
         });
   
         if (response.status === 201) {
-          const { id } = response.data; 
-          navigate(`/developer/${id}`);
+          const { gameId } = response.data; 
+          navigate(`/developer/${gameId}`);
         } else {
           console.error('Failed to create the game:', response);
         }

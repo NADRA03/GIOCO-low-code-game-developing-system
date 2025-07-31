@@ -1,10 +1,13 @@
-const API_BASE_URL = 'http://192.168.0.100:3000';                           ////////here////////
+const API_BASE_URL = 'http://172.20.10.5:3000';                           ////////here////////
+export const API_BASE_URL_HTML = 'http://172.20.10.5:3001';
 // const API_BASE_URL = 'http://172.20.10.5:3000'; 
 const API_ENDPOINTS = {
   write_comment: `${API_BASE_URL}/write_comment`,
   user_plays: (userId) => `${API_BASE_URL}/user/plays/${userId}`,
   a_profile: (userId) => `${API_BASE_URL}/a_user_data/${userId}`,  
   login: `${API_BASE_URL}/login`,
+  adminSearch: `${API_BASE_URL}/admin-search`,
+  adminSuspend: `${API_BASE_URL}/admin-suspend`,
   signup: `${API_BASE_URL}/signup`,
   edit_user_profile: `${API_BASE_URL}/edit_user_profile`,
   all_profile: `${API_BASE_URL}/all_user_data`,
@@ -13,6 +16,7 @@ const API_ENDPOINTS = {
   edit_password: `${API_BASE_URL}/edit-password`,
   all_profiles: `${API_BASE_URL}/all_users_data`,
   profile: `${API_BASE_URL}/profile`,
+  top_player: `${API_BASE_URL}/top-player`,
   profile_all: `${API_BASE_URL}/profile_all`,
   get_notifications: `${API_BASE_URL}/get_notifications`,
   create_notification: `${API_BASE_URL}/create_notification`,

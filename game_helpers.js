@@ -4,9 +4,10 @@ import API_ENDPOINTS from "./api";
 import { storage } from './firebaseConfig';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 
-const useGameDetails = (gameId) => {  
+const useGameDetails = (gameId) => {
   const [gameData, setGameData] = useState(null);
-  const [imageSource, setImageSource] = useState(null);
+  const [imageSource, setImageSource] = useState(null); // Start with null, not a previous image
+  const [error, setError] = useState(false);  // Track error state
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -16,26 +17,32 @@ const useGameDetails = (gameId) => {
 
         // Find file starting with gameId
         const gameImage = files.items.find((file) =>
-          file.name.startsWith(gameData?.id)
+          file.name.startsWith(gameId)
         );
 
         if (gameImage) {
           const url = await getDownloadURL(gameImage);
           setImageSource({ uri: url });
+        } else {
+          // If no image is found for the current game, set the error state
+          setImageSource(null);
+          setError(true);  // Indicate that there was an error finding the image
         }
       } catch (error) {
         console.error('Error fetching game image:', error);
-        setImageSource(require('./assets/gamelogo.png'));  
+        setImageSource(null);  // Reset image to null if there's an error
+        setError(true);  // Indicate error
       }
     };
 
-    if (gameData?.id) {
+    if (gameId) {
       fetchImage();
     }
-  }, [gameData?.id]);
+  }, [gameId]);
 
   const handleImageError = () => {
-    setImageSource(require('./assets/gamelogo.png'));
+    setImageSource(require('./assets/gamelogo.png'));  // Fallback to a default image
+    setError(false);  // Reset error state when fallback is used
   };
 
   useEffect(() => {
@@ -43,7 +50,7 @@ const useGameDetails = (gameId) => {
       try {
         const response = await axios.get(API_ENDPOINTS.game_details(gameId));
         setGameData(response.data);
-        // console.log(response.data)
+        setError(false); // Reset error on successful game data fetch
       } catch (error) {
         console.error("Error fetching game data:", error);
         alert("Failed to fetch game details.");
@@ -55,7 +62,8 @@ const useGameDetails = (gameId) => {
     }
   }, [gameId]);
 
-  return { gameData, imageSource, handleImageError };
+  return { gameData, imageSource, handleImageError, error };  // Return error state too if needed
 };
 
 export default useGameDetails;
+

@@ -11,28 +11,13 @@ import useProfile from './get_session';
 import { useNavigate } from 'react-router-native';
 
 export default function Home() {
-const { imageSource, handleImageError } = useProfile();
+const { profileData , imageSource, handleImageError } = useProfile();
 const [selectedGame, setSelectedGame] = useState(null);
-const [profileData, setProfileData] = useState({ username: '', profile_image: '' })
 const navigate = useNavigate();
 const moveAnim = new Animated.Value(0);
 const [topGames, setTopGames] = useState([]);
 const [loading, setLoading] = useState(false);
 
-
-useEffect(() => {
-  const fetchProfileData = async () => {
-    try {
-      const response = await axios.get(API_ENDPOINTS.profile, { withCredentials: true }); 
-      setProfileData(response.data); 
-    } catch (error) {
-      console.error('Error fetching profile data:', error);
-      alert('Failed to fetch profile information.');
-    }
-  };
-
-  fetchProfileData();
-}, []);
 
 const handleSelectGame = (game) => {
   setSelectedGame(game);
@@ -49,7 +34,7 @@ const handleJoinGame = async () => {
     return;
   }
 
-  const gameId = selectedGame.id; // Get the gameId from the selected game
+  const gameId = selectedGame.id; 
   setLoading(true);
 
   try {
@@ -70,7 +55,7 @@ const handlePlay = async () => {
     return;
   }
 
-  const gameId = selectedGame.id; // Get the gameId from the selected game
+  const gameId = selectedGame.id; 
   setLoading(true);
 
   try {
@@ -116,6 +101,9 @@ const translateX = moveAnim.interpolate({
 const handleProfilePress = () => {
   navigate('/profile'); 
 };
+const handleAdminPress = () => {
+  navigate('/admin'); 
+};
 const handleCraftPress = () => {
         navigate('/select'); 
       };
@@ -158,8 +146,17 @@ const [imageError, setImageError] = useState(false);
           style={styles.profileImage}
           onError={handleImageError} 
         />
-        <CustomText style={styles.username}>{profileData.username}</CustomText>
+        <CustomText style={styles.username}>{profileData?.username}</CustomText>
       </TouchableOpacity>
+  
+  {profileData?.role === 'admin' && (
+    <TouchableOpacity onPress={handleAdminPress}>
+  <Image
+    source={require('./assets/mod.png')} // Replace with your actual moderator image path
+    style={styles.modImage}
+  />
+  </TouchableOpacity>
+)}
       {/* <TouchableOpacity style={styles.profileButton} onPress={handleAProfilePress}>
           <CustomText style={styles.profileButtonText}>Check this Profile!</CustomText>
       </TouchableOpacity> */}
@@ -200,6 +197,11 @@ const [imageError, setImageError] = useState(false);
         <CustomText style={styles.noGamesText}>No recommended games</CustomText>
     ) : (
         <ScrollView horizontal contentContainerStyle={styles.gamesContainer} showsHorizontalScrollIndicator={false}>
+        <TouchableOpacity style={styles.gameItem} onPress={handleMapGamePress}>
+          <Image  source= {require('./assets/gamelogo.png')}
+                style={styles.gameImage}   />
+                    <CustomText style={styles.gameName}>Gioco</CustomText>
+        </TouchableOpacity>
             {topGames.map((game) => (
                 <TouchableOpacity key={game.id} onPress={() => handleSelectGame(game)} style={styles.gameItem}>
                     <Image  source={imageError ? require('./assets/gamelogo.png') : { uri: game.image_url }} 
@@ -210,15 +212,25 @@ const [imageError, setImageError] = useState(false);
             ))}
         </ScrollView>
     )}
-          <TouchableOpacity style={styles.gameButton} onPress={handleMapGamePress}>
+        {/* <TouchableOpacity style={styles.gameButton} onPress={handleMapGamePress}>
           <CustomText style={styles.gameButtonText}>Try This Game!</CustomText>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         </View>
 
         {/* Second Container */}
         <View style={styles.section}>
           <CustomText style={styles.title}>Continue</CustomText>
           {/* Add content for game search here */}
+          <ScrollView horizontal contentContainerStyle={styles.gamesContainer}     showsHorizontalScrollIndicator={false}>
+            {topGames.map((game) => (
+                <TouchableOpacity key={game.id} onPress={() => handleSelectGame(game)} style={styles.gameItem}>
+                    <Image  source={imageError ? require('./assets/gamelogo.png') : { uri: game.image_url }} 
+                style={styles.gameImage} 
+                onError={() => setImageError(true)}  />
+                    <CustomText style={styles.gameName}>{game.name}</CustomText>
+                </TouchableOpacity>
+            ))}
+        </ScrollView>
         </View>
 
         {/* Third Container */}
@@ -433,6 +445,14 @@ gameName: {
     width: 40,
     height: 40,
     opacity: 0.5,
+  },
+  modImage: {
+    position: 'absolute',
+    top: 175,
+    left: '79%',
+    resizeMode: 'contain',
+    width: 60,
+    height: 60,
   },
   username: {
     fontSize: 18,

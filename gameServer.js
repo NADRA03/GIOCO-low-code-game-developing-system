@@ -20,15 +20,18 @@ import axios from 'axios';
 import API_ENDPOINTS, { API_BASE_URL } from './api';
 import { useParams } from 'react-router-dom';
 import useGameDetails from "./game_helpers";  
+import { useNavigate } from 'react-router-native';
 
 const GameServer = () => {
   const [comments, setComments] = useState([]);
+  const [topPlayer, setTopPlayer] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [keyboardHeight] = useState(new Animated.Value(0));
   const { id, admin } = useParams();
   const isAdmin = admin === 'true'; 
   const scrollViewRef = useRef(null);
+  const navigate = useNavigate();
   const { gameData, imageSource, handleImageError } = useGameDetails(id);
    
   // Socket connection and listener
@@ -96,6 +99,11 @@ const GameServer = () => {
     setNewComment(text);
   };
 
+
+  const handlePlay = () => {
+    navigate(`/runGame?id=${id}`); 
+  };
+
   const postComment = async () => {
     if (!newComment.trim()) return;
   
@@ -126,12 +134,54 @@ const GameServer = () => {
       setLoading(false);
     }
   };
+
+  const fetchTopPlayer = async (id) => {
+    try {
+      const response = await axios.get(API_ENDPOINTS.top_player, {
+        params: { game_id: id },
+        withCredentials: true // in case the endpoint is protected by session
+      });
   
+      if (response.status === 200) {
+        const { username, score } = response.data;
+        console.log(`Top Player: ${username} with score: ${score}`);
+        return { username, score };
+      } else {
+        console.warn("Unexpected response from top player API:", response);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching top player:", error);
+      return null;
+    }
+  };
+  
+  useEffect(() => {
+    const getTopPlayer = async () => {
+      const topPlayerData = await fetchTopPlayer(id);
+      if (topPlayerData) {
+        setTopPlayer(topPlayerData);
+      }
+    };
+  
+    // Run immediately
+    getTopPlayer();
+  
+    // Set interval to run every 5 seconds
+    const interval = setInterval(() => {
+      getTopPlayer();
+    }, 5000);
+  
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <View style={styles.container}>
           <View style={styles.gameProfile}>
+           <TouchableOpacity style={styles.playButton} onPress={handlePlay}>
           <CustomText style={styles.playBottun}>|&gt;</CustomText>
+          </TouchableOpacity>
           <Image
           source={imageSource || handleImageError()} 
           style={styles.profileImage}
@@ -140,6 +190,17 @@ const GameServer = () => {
         <CustomText style={styles.name}>
               {gameData?.name ? gameData.name : "Loading..."}
         </CustomText>
+        <CustomText style={[styles.name, styles.description]}>
+            {gameData?.description}
+        </CustomText>
+        {topPlayer?.username && (
+  <View style={styles.topPlayerContainer}>
+    {/* <CustomText style={styles.topPlayerTitle}>Top Player</CustomText> */}
+    <CustomText style={styles.topPlayerText}>
+      {topPlayer.username} - {topPlayer.score} pts
+    </CustomText>
+  </View>
+)}
         </View>
     <ImageBackground style={styles.background}>
     {/* <Image source={require('./assets/logo.png')} resizeMode="contain" style={styles.logo} /> */}
@@ -186,6 +247,10 @@ const GameServer = () => {
 };
 
 const styles = StyleSheet.create({
+  description:{
+        color: '#262626',
+        fontSize: 15,
+  },
   playBottun: {
     color: '#28A745',
     fontWeight: 'bold',
@@ -205,10 +270,23 @@ const styles = StyleSheet.create({
 
    top: -30,
   },
+  topPlayerContainer: {
+    alignItems: 'center',
+  },
   name: {
     color: 'white',
     marginTop: 15,
     fontSize: 20,
+  },
+  topPlayerTitle: {
+    color: 'white',
+    marginTop: 15,
+    fontSize: 16,
+  },
+  topPlayerText: {
+    color: '#28A745',
+    marginTop: 15,
+    fontSize: 16,
   },
 logo: {
         left:'30%',

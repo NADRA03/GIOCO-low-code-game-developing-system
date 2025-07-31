@@ -19,6 +19,7 @@ import Folder from './Folder';
 import Map from './Map';
 import Search from './Search';
 import RunGame from './runGame';
+import DevGame from './devGame';
 import EditProfile from './edit_profile';
 import ReportProblem from './report';
 import A_Profile from './a_profile';
@@ -26,6 +27,8 @@ import ErrorBoundary from './ErrorBoundary';
 import EditAccount from './editAccount';
 import Dashboard from './dashboard';
 import GameServer from './gameServer';
+import Admin from './admin';
+import CraftPixelArt from './pixelArt';
 
 const Stack = createNativeStackNavigator();
 
@@ -46,6 +49,7 @@ export default function App() {
             <Route path="/run" element={<Run />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/runGame" element={<RunGame/>} />
+            <Route path="/devGame" element={<DevGame/>} />
             <Route path="/game" element={<Game />} />
             <Route path="/play" element={<PlayScreen />} />
             <Route path="/profile" element={<Profile />} />
@@ -53,6 +57,7 @@ export default function App() {
             <Route path="/select" element={<SelectGameType />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/assets/:id" element={<Assets />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="/folder/:id" element={<Folder />} />
             <Route path="/developer/:id" element={<Developer />} />
             <Route path="/Map/:id" element={<Map />} />
@@ -60,6 +65,7 @@ export default function App() {
             <Route path="/editProfile" element={<EditProfile />} />
             <Route path="/editAccount" element={<EditAccount />} />
             <Route path="/report" element={<ReportProblem />} />
+            <Route path="/pixelart" element={<CraftPixelArt />} />
           </Routes>
         </ErrorBoundary>
       </FontLoader>

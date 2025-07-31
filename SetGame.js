@@ -118,7 +118,11 @@ const SetGame = ({ id }) => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView style={styles.container}>
         <CustomText style={styles.title}>Edit Game</CustomText>
-        {imagePreview && <Image source={imagePreview || handleImageError()} onError={handleImageError} style={styles.profileImage} />}
+        <Image
+  source={imagePreview?.uri ? imagePreview : require('./assets/gamelogo.png')}
+  onError={handleImageError}
+  style={styles.profileImage}
+/>
         <TouchableOpacity onPress={pickImage} style={styles.imageButton}>
           <Text style={styles.imageButtonText}>Select Image</Text>
         </TouchableOpacity>
@@ -192,16 +196,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
       },
       private: {
-        backgroundColor: '#FF5733', // Private color
+        backgroundColor: '#FF5733', 
       },
       public: {
-        backgroundColor: '#3498db', // Public color
+        backgroundColor: '#3498db', 
       },
       startServing: {
-        backgroundColor: '#2ecc71', // Start Serving color
+        backgroundColor: '#2ecc71', 
       },
       stopServing: {
-        backgroundColor: '#e74c3c', // Stop Serving color
+        backgroundColor: '#e74c3c',
       },
       buttonTextB: {
         color: 'white',

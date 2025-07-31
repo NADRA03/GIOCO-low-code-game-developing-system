@@ -144,12 +144,12 @@ export default function SignUpScreen() {
         <View>
           {!showInputs && (
             <>
-            <TouchableOpacity style={styles.button} onPress={() => promptAsync()}>
+            {/* <TouchableOpacity style={styles.button} onPress={() => promptAsync()}>
                     <View style={styles.buttonContent}>
                     <Image source={require('./assets/google.png')} style={styles.icon} />
                     <CustomText style={styles.buttonText}>Sign Up with Google</CustomText>
                     </View>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
               <TouchableOpacity
                 style={[styles.button, styles.withEmail]}
                 onPress={() => setShowInputs(true)} // Show email inputs when clicking 'Sign Up with Email'
@@ -218,14 +218,14 @@ export default function SignUpScreen() {
               <TouchableOpacity style={styles.buttonSignUp} onPress={handleSignUp}>
                 <CustomText style={styles.buttonSignUpText}>Sign Up</CustomText>
               </TouchableOpacity>
-              {!isGoogleSignUp && (
+              {/* {!isGoogleSignUp && (
                 <TouchableOpacity style={styles.button} onPress={() => promptAsync()}>
                     <View style={styles.buttonContent}>
                     <Image source={require('./assets/google.png')} style={styles.icon} />
                     <CustomText style={styles.buttonText}>Sign Up with Google</CustomText>
                     </View>
                 </TouchableOpacity>
-              )}
+              )} */}
             </View>
           )}
         </View>
@@ -295,6 +295,7 @@ const styles = StyleSheet.create({
     borderColor: '#262626',
     borderWidth: 1,
     marginBottom: 20,
+    width: '300',
     paddingLeft: 10,
     color: 'white',
     fontFamily: 'Minecraft Regular',

@@ -8,12 +8,14 @@ import FontLoader from './FontLoader';
 import API_ENDPOINTS from './api';
 import { useEffect, useState } from 'react';
 import { storage } from './firebaseConfig';
+import useProfile from './get_session';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 
 import { useNavigate } from 'react-router-native';
 export default function Profile() {
   
 const [profileData, setProfileData] = useState({ username: '', profile_image: '', id: 0 })
+const { profileData: profileDataAll } = useProfile();
 const [plays, setPlays] = useState({ played: 0})
 const [drawAssets, setDrawAssets] = useState([]); 
 const [imageUri, setImageUri] = useState(null);
@@ -225,8 +227,11 @@ const deleteAsset = async (assetId) => {
   source={imageSource || handleImageError()}
   style={styles.profileImage}
   onError={handleImageError}
-/>;
+/>
         <CustomText style={styles.username}>{profileData.username}</CustomText>
+        {profileDataAll?.bio && (
+  <CustomText style={styles.bio}>{profileDataAll.bio}</CustomText>
+)}
      </View>
 
 
@@ -343,6 +348,12 @@ const styles = StyleSheet.create({
     fontSize: 28, 
     color: '#ffffff',
     fontWeight: 'bold',
+  },
+  bio: {
+    fontSize: 20, 
+    color: '#262626',
+    fontWeight: 'bold',
+    marginTop: 20,
   },
   container: {
       flex: 1,
