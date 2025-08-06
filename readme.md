@@ -1,5 +1,5 @@
 
-# 🎮 Gioco
+# 🎮 GIOCO
 
 **Gioco** is a no-code/low-code mobile-app game development platform that empowers anyone to turn their creative ideas into playable games. Whether you're a beginner with no coding experience or a developer looking to prototype quickly, Gioco lets you bring your game concepts to life using images, sounds, and simple logic—without writing thousands of lines of code.
 
